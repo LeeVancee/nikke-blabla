@@ -1,95 +1,239 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
+import Image from 'next/image';
+import styles from './page.module.css';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+  /* ChatMessageData, */ Project,
+  ProjectType,
+  buttonType,
+  IProjectData,
+  nikkeData,
+  INikkeData,
+  ChatMessageData,
+} from '@/script/project';
+import NikkeButton from '@/components/NikkeButton';
+import useCreateProject from '@/hooks/useCreateProject';
+import NikkeWindow from '@/components/NikkeWindow';
+
+import Header from '@/components/header/Header';
+import Text from '@/components/text/Text';
+import Contents from '@/components/contents/Contents';
+import NikkeWindowContent from '@/components/NikkeWindowContent';
+import NikkeDialog from '@/components/NikkeDialog';
+
+const initialProject: IProjectData = { datas: [] };
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+  const createProject = useCreateProject();
+  const [selectType, setSelectType] = useState('1');
+  const [project, setProject] = useState(initialProject);
+  const [currentTabId, setCurrentTabId] = useState(1);
+  const [filteredData, setFilteredData] = useState<Project[]>();
+  const [listNumber, setListNumber] = useState(0);
+  const [selectNikke, setSelectNikke] = useState<Array<INikkeData>>([]);
+  const [isSelect, setIsSelect] = useState<Array<boolean>>([]);
+  const [currentProject, setCurrentProject] = useState(-1);
+  const [proName, setProName] = useState('默认对话');
+  const [proType, setProType] = useState(ProjectType.Nikke);
+  const [proDesc, setProDesc] = useState('这是一个简单的小故事');
+  const [author, setAuthor] = useState('');
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+  const selectTab = useCallback(
+    (index: number) => {
+      setCurrentTabId(index);
+      // 过滤数据
+      // 过滤数据
+      const newData = project.datas.filter((item) => item.type === index);
+      setFilteredData(newData);
+      setListNumber(newData.length);
+    },
+    [project.datas]
+  );
+
+  const handleTypeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSelectType(e.target.value);
+    },
+    []
+  );
+
+  const buttonStyle = { width: '150px', height: '45px', margin: '5px' };
+
+  function select(value: any, index: any) {
+    setSelectNikke((prevSelectNikke) => {
+      if (!prevSelectNikke.some((item) => item.img === value.img)) {
+        return [...prevSelectNikke, value];
+      } else {
+        return prevSelectNikke.filter((item) => item.img !== value.img);
+      }
+    });
+
+    setIsSelect((prevIsSelect) => {
+      const updatedIsSelect = [...prevIsSelect];
+      updatedIsSelect[index] = !prevIsSelect[index];
+      return updatedIsSelect;
+    });
+    // console.log('已选nikke：', selectNikke);
+  }
+
+  useEffect(() => {
+    // 从本地存储中获取项目数据
+    const storedProjects = localStorage.getItem('projects');
+
+    if (storedProjects === null) {
+      // 如果本地存储中没有项目数据，则将初始数据存储到本地存储中
+      localStorage.setItem('projects', JSON.stringify(initialProject));
+    } else {
+      // 如果本地存储中有项目数据，则使用它来更新项目状态
+      setProject(JSON.parse(storedProjects));
+    }
+  }, []);
+
+  useEffect(() => {
+    // 过滤数据
+    const newData = project.datas.filter((item) => item.type === currentTabId);
+    setFilteredData(newData);
+    setListNumber(newData.length);
+  }, [currentTabId, project.datas]);
+
+  const checkData = () =>
+    proName !== '' && author !== '' && selectNikke.length !== 0;
+
+  const success = () => {
+    if (checkData()) {
+      var msgData: ChatMessageData = {
+        list: [],
+      };
+      const pro: Project = new Project(
+        proName,
+        proDesc,
+        author,
+        parseInt(selectType),
+        msgData
+      );
+      console.log(proDesc);
+
+      selectNikke.forEach((item) => pro.projectNikkes.push(item));
+      console.log(pro);
+
+      // 使用 setProject 更新状态
+      setProject((prevProject) => {
+        const updatedProject = {
+          ...prevProject,
+          datas: [...prevProject.datas, pro],
+        };
+
+        // 更新完数据后，再打印
+        console.log('new Pro', updatedProject);
+
+        // 更新 localStorage
+        localStorage.setItem('projects', JSON.stringify(updatedProject));
+
+        return updatedProject;
+      });
+
+      // 清空其他状态
+      setIsSelect([]);
+      setSelectNikke([]);
+      console.log('更新对象项目到localStorage中');
+      selectTab(pro.type.valueOf());
+      setProName('默认对话');
+      setProType(ProjectType.Nikke);
+      setProDesc('这是一个简单的小故事');
+      setAuthor('');
+      createProject.close();
+    } else {
+      console.error(
+        '创建对话失败，对话名称和作者以及对话妮姬不能小于1不能为空！'
+      );
+    }
+  };
+  const cancel = () => {
+    setIsSelect([]);
+    setSelectNikke([]);
+    createProject.close();
+    setProName('默认对话');
+    setProType(ProjectType.Nikke);
+    setProDesc('这是一个简单的小故事');
+    setAuthor('');
+  };
+
+  const back = (pro: Project) => {
+    console.log(pro);
+
+    project.datas[currentProject] = pro;
+    localStorage.setItem('projects', JSON.stringify(project));
+    setCurrentProject(-1);
+    console.log('回退成功');
+  };
+  const handleCurrentProject = (index: number) => {
+    setCurrentProject(index);
+  };
+
+  return (
+    <>
+      {filteredData && currentProject !== -1 && (
+        <div style={{ height: '100%' }}>
+          <NikkeDialog dialogData={filteredData[currentProject]} back={back} />
+        </div>
+      )}
+      <div className={styles.btnbox} style={{ height: '100%' }}>
+        <NikkeButton
+          type={buttonType.Cancel}
+          content="导出对话"
+          style={buttonStyle}
+        />
+        <NikkeButton
+          type={buttonType.Success}
+          content="创建对话"
+          onClick={createProject.open}
+          style={buttonStyle}
         />
       </div>
+      <div className={styles.box}>
+        <div className={`${styles.box} ${styles.back}`}>
+          <Image
+            src={`/background.png`}
+            alt="background"
+            fill
+            style={{ objectFit: 'cover' }}
+            priority
+          />
+        </div>
+        {createProject.isOpen && (
+          <NikkeWindow
+            title="Nikke Chat 生成器"
+            confirm={true}
+            buttonSuccess="创建"
+            buttonCancel="取消"
+            success={success}
+            cancel={cancel}
+          >
+            <NikkeWindowContent
+              proName={proName}
+              setProName={setProName}
+              proDesc={proDesc}
+              setProDesc={setProDesc}
+              author={author}
+              setAuthor={setAuthor}
+              selectType={selectType}
+              handleTypeChange={handleTypeChange}
+              isSelect={isSelect}
+              select={select}
+            />
+          </NikkeWindow>
+        )}
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+        <Header currentTabId={currentTabId} selectTab={selectTab} />
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+        <Text listNumber={listNumber} />
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        <Contents
+          filteredData={filteredData}
+          currentProject={currentProject}
+          onCurrentProject={handleCurrentProject}
+        />
       </div>
-    </main>
-  )
+    </>
+  );
 }
