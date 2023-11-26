@@ -25,7 +25,7 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
 
   return (
     <div className={styles.card} onClick={onClick}>
-      <div className={styles.role}>
+      {/* <div className={styles.role} style={{ backgroundImage: 'none' }}>
         <Image
           src={`/avatars/${selectNikkes.projectNikkes[0].img}.png`}
           fill
@@ -34,7 +34,13 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
           style={{ objectFit: 'cover' }}
           priority
         />
-      </div>
+      </div> */}
+      <div
+        className={styles.role}
+        style={{
+          backgroundImage: `url(/avatars/${selectNikkes.projectNikkes[0].img}.png)`,
+        }}
+      ></div>
       <div className={styles.textContent}>
         {children}
 
