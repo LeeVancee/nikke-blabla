@@ -178,7 +178,7 @@
   z-index: 999999;
   box-shadow: none;
   transform: translateY(-100vh);
-  animation: slideIn 0.8s ease-in-out 1;
+  animation: slideIn 1s ease-in-out 1;
 }
 
 @keyframes slideIn {
@@ -213,6 +213,7 @@
     0.7px 0.7px 46.3px rgba(0, 0, 0, 0.061), 1px 1px 94px rgba(0, 0, 0, 0.08);
   background: linear-gradient(transparent 50%, #fda912 50%),
     linear-gradient(90deg, transparent 50%, #f8be53bb 50%);
+
   background-size: 5px 5px;
   background-position: center;
   background-color: #fda912;

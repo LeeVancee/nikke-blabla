@@ -37,7 +37,7 @@ const NikkeWindow = ({
           {!confirm && <div className={styles.x} onClick={cancel}></div>}
           <span className={styles.title}>{title}</span>
 
-          <Image src="/gg_top.png" fill alt="" />
+          <Image src="/gg_top.png" fill alt="" priority />
         </div>
         <div className={styles.contentBox}>{children}</div>
         {confirm && (

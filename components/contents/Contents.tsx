@@ -7,14 +7,13 @@ import NikkeDialog from '../NikkeDialog';
 
 interface ContentProps {
   filteredData?: Project[];
-  currentProject?: number;
+
   onCurrentProject: (index: number) => void;
   back?: any;
 }
 const Contents = ({
   filteredData,
-  currentProject,
-  back,
+
   onCurrentProject,
 }: ContentProps) => {
   const openDialog = (index: number) => {
@@ -24,17 +23,15 @@ const Contents = ({
     <>
       <div className={styles.content}>
         <div className={styles.cardList}>
-          {filteredData && filteredData.length > 0 ? (
+          {filteredData &&
+            filteredData.length > 0 &&
             filteredData.map((value, index) => (
               <ProjectCard
                 key={index}
                 selectNikkes={value}
                 onClick={() => openDialog(index)}
               ></ProjectCard>
-            ))
-          ) : (
-            <p>Loading...</p>
-          )}
+            ))}
         </div>
       </div>
     </>

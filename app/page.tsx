@@ -33,15 +33,33 @@ export default function Home() {
   const [selectNikke, setSelectNikke] = useState<Array<INikkeData>>([]);
   const [isSelect, setIsSelect] = useState<Array<boolean>>([]);
   const [currentProject, setCurrentProject] = useState(-1);
-  const [proName, setProName] = useState('默认对话');
+  const [proName, setProName] = useState('');
   const [proType, setProType] = useState(ProjectType.Nikke);
   const [proDesc, setProDesc] = useState('这是一个简单的小故事');
   const [author, setAuthor] = useState('');
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    function updateTime() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+
+      setCurrentTime(`${formatTime(hours)}:${formatTime(minutes)}`);
+    }
+
+    const intervalId = setInterval(updateTime, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  function formatTime(time: any) {
+    return time < 10 ? `0${time}` : time;
+  }
 
   const selectTab = useCallback(
     (index: number) => {
       setCurrentTabId(index);
-      // 过滤数据
       // 过滤数据
       const newData = project.datas.filter((item) => item.type === index);
       setFilteredData(newData);
@@ -59,7 +77,21 @@ export default function Home() {
 
   const buttonStyle = { width: '150px', height: '45px', margin: '5px' };
 
+  // 辅助函数，检查是否是多选
+  /*   const isMultipleSelection = useCallback(() => {
+    return isSelect.length > 1 && isSelect.some((isSelected) => isSelected);
+  }, [isSelect]); */
+
   function select(value: any, index: any) {
+    setProName((prevProName) => {
+      if (isSelect.length > 0 && isSelect.some((isSelected) => isSelected)) {
+        // 多选时将 proName 设置为 '空'
+        return '';
+      } else {
+        return value.name;
+      }
+    });
+
     setSelectNikke((prevSelectNikke) => {
       if (!prevSelectNikke.some((item) => item.img === value.img)) {
         return [...prevSelectNikke, value];
@@ -73,7 +105,6 @@ export default function Home() {
       updatedIsSelect[index] = !prevIsSelect[index];
       return updatedIsSelect;
     });
-    // console.log('已选nikke：', selectNikke);
   }
 
   useEffect(() => {
@@ -158,14 +189,18 @@ export default function Home() {
     setAuthor('');
   };
 
-  const back = (pro: Project) => {
-    console.log(pro);
+  const back = () => {
+    setCurrentProject(-1);
+  };
 
+  // 保存对话函数
+  const handleSaveMsg = (pro: Project) => {
     project.datas[currentProject] = pro;
     localStorage.setItem('projects', JSON.stringify(project));
-    setCurrentProject(-1);
-    console.log('回退成功');
+
+    console.log('保存成功');
   };
+
   const handleCurrentProject = (index: number) => {
     setCurrentProject(index);
   };
@@ -173,9 +208,12 @@ export default function Home() {
   return (
     <>
       {filteredData && currentProject !== -1 && (
-        <div style={{ height: '100%' }}>
-          <NikkeDialog dialogData={filteredData[currentProject]} back={back} />
-        </div>
+        <NikkeDialog
+          dialogData={filteredData[currentProject]}
+          back={back}
+          saveMsg={handleSaveMsg}
+          currentTime={currentTime}
+        />
       )}
       <div className={styles.btnbox} style={{ height: '100%' }}>
         <NikkeButton
@@ -224,13 +262,16 @@ export default function Home() {
           </NikkeWindow>
         )}
 
-        <Header currentTabId={currentTabId} selectTab={selectTab} />
+        <Header
+          currentTabId={currentTabId}
+          selectTab={selectTab}
+          currentTime={currentTime}
+        />
 
         <Text listNumber={listNumber} />
 
         <Contents
           filteredData={filteredData}
-          currentProject={currentProject}
           onCurrentProject={handleCurrentProject}
         />
       </div>

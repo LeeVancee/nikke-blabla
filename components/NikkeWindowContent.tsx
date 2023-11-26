@@ -7,8 +7,8 @@ import Image from 'next/image';
 interface NikkeWindowContentProps {
   proName: string;
   setProName: (value: string) => void;
-  proDesc: string;
-  setProDesc: (value: string) => void;
+  proDesc?: string;
+  setProDesc?: (value: string) => void;
   author: string;
   setAuthor: (value: string) => void;
   selectType: string;
@@ -40,10 +40,11 @@ const NikkeWindowContent = ({
             value={proName}
             onChange={(e) => setProName(e.target.value)}
             type="text"
+            placeholder="请输入对话名称"
           />
         </div>
         <div className={styles.pcontent}>
-          <span>对话类型 *</span>
+          <span>对话类型 </span>
           <NikkeRadio label="任务" checked={true} style={{ flex: 1 }}>
             <div
               style={{
@@ -89,15 +90,15 @@ const NikkeWindowContent = ({
             <NikkeInfo>(目前只实现妮姬类型)</NikkeInfo>
           </NikkeRadio>
         </div>
-        <div className={styles.pcontent}>
-          <span>对话名称 *</span>
+        {/* <div className={styles.pcontent}>
+          <span>描述 </span>
           <input
             className="nikkeInput"
             value={proDesc}
             onChange={(e) => setProDesc(e.target.value)}
             type="text"
           />
-        </div>
+        </div> */}
         <div className={styles.pcontent}>
           <span>作者 *</span>
           <input

@@ -8,7 +8,21 @@ interface ProjectCardProps {
   children?: React.ReactNode;
   onClick?: () => void | undefined;
 }
+
+const MessageContent = ({ message }: any) => {
+  if (message.msgType === '图片') {
+    return <div>[图片]</div>;
+  } else {
+    return <span>{message.msg.slice(-1)[0]}</span>;
+  }
+};
+
 const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
+  const lastMessage =
+    selectNikkes.messageData.list.length > 0
+      ? selectNikkes.messageData.list[selectNikkes.messageData.list.length - 1]
+      : null;
+
   return (
     <div className={styles.card} onClick={onClick}>
       <div className={styles.role}>
@@ -23,6 +37,7 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
       </div>
       <div className={styles.textContent}>
         {children}
+
         <div
           style={{
             display: 'flex',
@@ -31,7 +46,10 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
             paddingRight: '5px',
           }}
         >
-          <span style={{ fontSize: '12px', fontWeight: 'bold' }}>
+          <span style={{ fontSize: '18px', fontWeight: 'bold' }}>
+            <span style={{ marginRight: '5px' }}>
+              <Image src="/allround.png" width={14} height={12} alt="" />
+            </span>
             {selectNikkes.name}
           </span>
           <span className={styles.cardAuthor}>
@@ -42,7 +60,7 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
         <div
           style={{ flex: 1, fontSize: '15px', marginTop: '2px', color: 'gray' }}
         >
-          <span>{selectNikkes.description}</span>
+          <span>{lastMessage && <MessageContent message={lastMessage} />}</span>
         </div>
       </div>
     </div>

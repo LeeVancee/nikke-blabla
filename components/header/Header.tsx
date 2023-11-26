@@ -12,7 +12,7 @@ const initialData = [
 
 const initialProject: IProjectData = { datas: [] };
 
-const Header = ({ currentTabId, selectTab }: any) => {
+const Header = ({ currentTabId, selectTab, currentTime }: any) => {
   const data = useMemo(
     () => [
       { id: ProjectType.Task, type: '任务' },
@@ -25,15 +25,15 @@ const Header = ({ currentTabId, selectTab }: any) => {
     <div className={styles.header}>
       <div className={styles.title}>
         <span style={{ verticalAlign: 'middle' }}>
-          <Image src="/wifi.png" alt=" Logo" width={18} height={18} />
+          <Image src="/wifi.png" alt=" Logo" width={20} height={14} />
         </span>
-        <span style={{ marginLeft: '5px' }}>
-          <Timer />
+        <span style={{ marginLeft: '5px', display: 'inline-block' }}>
+          <Timer currentTime={currentTime} />
         </span>
-        <span className={styles.logoText}>生成器 v1.1</span>
+        <span className={styles.logoText}>blabla Genrator</span>
       </div>
       <div className={styles.logo}>
-        <span>Nikke Chat</span>
+        <Image src="/ele_title_sns.png" alt=" Logo" width={136} height={35} />
       </div>
       <div className={styles.tab}>
         {data.map((value) => (

@@ -16,6 +16,8 @@ import NikkeMessage from './NikkeMessage';
 interface NikkeDialogProps {
   dialogData: any;
   back: (pro: Project) => void;
+  currentTime: any;
+  saveMsg: (pro: Project) => void;
 }
 
 const initialTypeList = [
@@ -25,7 +27,12 @@ const initialTypeList = [
   msgType.partition,
 ];
 
-const NikkeDialog = ({ dialogData: initialData, back }: NikkeDialogProps) => {
+const NikkeDialog = ({
+  dialogData: initialData,
+  back,
+  currentTime,
+  saveMsg,
+}: NikkeDialogProps) => {
   const fileInput = useRef<HTMLInputElement>(null);
   const [typeList, setTypeList] = useState(initialTypeList);
   const [currentModel, setCurrentModel] = useState(msgType.nikke);
@@ -43,12 +50,6 @@ const NikkeDialog = ({ dialogData: initialData, back }: NikkeDialogProps) => {
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
   );
-
-  /* const [info, setInfo] = useState<ICharacterData>({
-    msgType: currentModel, // 初始值可能需要根据你的需求修改
-    msg: [],
-    nikke: dialogData.projectNikkes[currentNikke],
-  }); */
 
   function selectModel(type: msgType) {
     setInputPlaceholder('请输入对话内容');
@@ -176,6 +177,7 @@ const NikkeDialog = ({ dialogData: initialData, back }: NikkeDialogProps) => {
     setDialogData(newDialogData);
 
     setInputContent('');
+    saveMsg(dialogData);
   }, [
     dialogData,
     currentModel,
@@ -183,6 +185,7 @@ const NikkeDialog = ({ dialogData: initialData, back }: NikkeDialogProps) => {
     isOC,
     currentSelectImage,
     inputContent,
+    saveMsg,
   ]);
 
   const append = () => {
@@ -218,6 +221,7 @@ const NikkeDialog = ({ dialogData: initialData, back }: NikkeDialogProps) => {
       ].msg.push(inputContent);
 
       setInputContent('');
+      saveMsg(dialogData);
     }
   };
 
@@ -263,10 +267,10 @@ const NikkeDialog = ({ dialogData: initialData, back }: NikkeDialogProps) => {
       <div className={styles.dheader}>
         <div className={styles.title}>
           <span style={{ verticalAlign: 'middle' }}>
-            <Image src="/wifi.png" alt=" Logo" width={18} height={18} />
+            <Image src="/wifi.png" alt=" Logo" width={20} height={14} />
           </span>
           <span style={{ marginLeft: '5px' }}>
-            <Timer />
+            <Timer currentTime={currentTime} />
           </span>
         </div>
         <div className={styles.dback} onClick={() => back(dialogData)}>

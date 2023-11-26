@@ -69,7 +69,6 @@ const NikkeMessage = ({
       setEditInputs([index]);
       setEditContent(msgs[index]);
     }
-    console.log(index);
   };
   function deleteMsg(index: any) {
     const newMsgs = [...msgs];
@@ -92,10 +91,6 @@ const NikkeMessage = ({
     return parseInt(index);
   };
 
-  useEffect(() => {
-    // 在这里执行依赖于更新后状态的操作
-    // 这段代码将在状态更新后执行
-  }, [msgs, dialogData]);
   return (
     <>
       {type === msgType.nikke && (
