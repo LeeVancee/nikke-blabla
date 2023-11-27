@@ -1,8 +1,10 @@
+'use client';
 import styles from '@/app/page.module.css';
-import { INikkeData, nikkeData } from '@/script/project';
+import { INikkeData, nikke, nikkeData } from '@/script/project';
 import NikkeRadio from './NikkeRadio';
 import NikkeInfo from './NikkeInfo';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 interface NikkeWindowContentProps {
   proName: string;
@@ -18,6 +20,8 @@ interface NikkeWindowContentProps {
   select: (value: any, index: number) => void;
 }
 
+const enterprises = ['All', '极乐净土', '米西里斯', '泰特拉', '朝圣者', '反常'];
+
 const NikkeWindowContent = ({
   proName,
   setProName,
@@ -30,6 +34,26 @@ const NikkeWindowContent = ({
   isSelect,
   select,
 }: NikkeWindowContentProps) => {
+  const [selectedEnterprise, setSelectedEnterprise] = useState(null);
+  const [filteredNikkes, setFilteredNikkes] = useState(nikkeData.nikkes);
+
+  const selectEnterprise = (enterprise: any) => {
+    setSelectedEnterprise(enterprise);
+  };
+
+  useEffect(() => {
+    // 按企业筛选妮姬  企业为枚举类型  0 为全部  1 为极乐净土  2 为米西里斯  3 为泰特拉  4 为朝圣者  5 为反常
+    if (selectedEnterprise !== 0) {
+      const newFilteredNikkes = nikkeData.nikkes.filter(
+        (nikke) => nikke.enterprise === selectedEnterprise
+      );
+
+      setFilteredNikkes(newFilteredNikkes);
+    } else {
+      setFilteredNikkes(nikkeData.nikkes);
+    }
+  }, [selectedEnterprise]);
+
   return (
     <div className={styles.project}>
       <div className={styles.label}>
@@ -117,20 +141,22 @@ const NikkeWindowContent = ({
         {selectType === '1' && (
           <div className={styles.nikkeSelect}>
             <div className={styles.enterprise}>
-              <div
-                className={styles.enterpriseBox}
-                style={{ backgroundColor: '#32b1f4' }}
-              >
-                ALL
-              </div>
-              <div className={styles.enterpriseBox}>极乐净土</div>
-              <div className={styles.enterpriseBox}>米西利斯</div>
-              <div className={styles.enterpriseBox}>泰特拉</div>
-              <div className={styles.enterpriseBox}>朝圣者</div>
-              <div className={styles.enterpriseBox}>反常</div>
+              {enterprises.map((value, index) => (
+                <div
+                  className={`${styles.enterpriseBox} ${
+                    selectedEnterprise === index
+                      ? styles.selectedEnterprise
+                      : ''
+                  }`}
+                  key={index}
+                  onClick={() => selectEnterprise(index)}
+                >
+                  {value}
+                </div>
+              ))}
             </div>
             <div className={styles.nikkeGrid}>
-              {nikkeData.nikkes.map((value, index) => (
+              {filteredNikkes.map((value, index) => (
                 <div
                   className={`${styles.nikke} ${
                     isSelect[index] ? styles.nikkeCheck : ''

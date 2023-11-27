@@ -25,16 +25,6 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
 
   return (
     <div className={styles.card} onClick={onClick}>
-      {/* <div className={styles.role} style={{ backgroundImage: 'none' }}>
-        <Image
-          src={`/avatars/${selectNikkes.projectNikkes[0].img}.png`}
-          fill
-          sizes="(max-width: 768px) 100vw,"
-          alt=""
-          style={{ objectFit: 'cover' }}
-          priority
-        />
-      </div> */}
       <div
         className={styles.role}
         style={{

@@ -53,6 +53,9 @@
   box-shadow: 0px 0px 5px black;
   transition: all 0.1s ease-in-out;
 }
+.selectedEnterprise {
+  background-color: #32b1f4;
+}
 
 .nikkeSelect {
   max-height: 50%;
