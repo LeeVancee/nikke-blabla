@@ -12,6 +12,11 @@ import {
 } from '../script/project';
 import Timer from './Timer';
 import NikkeMessage from './NikkeMessage';
+import useOpenExportImg from '@/hooks/useOpenExportImg';
+import NikkeWindow from './NikkeWindow';
+import ExportImgContent from './ExportImgContent';
+import domtoimage from 'dom-to-image-more';
+import { saveAs } from 'file-saver';
 
 interface NikkeDialogProps {
   dialogData: any;
@@ -20,19 +25,10 @@ interface NikkeDialogProps {
   saveMsg: (pro: Project) => void;
 }
 
-const initialTypeList = [
-  msgType.nikke,
-  msgType.img,
-  msgType.aside,
-  msgType.partition,
-];
+const initialTypeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
 
-const NikkeDialog = ({
-  dialogData: initialData,
-  back,
-  currentTime,
-  saveMsg,
-}: NikkeDialogProps) => {
+const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: NikkeDialogProps) => {
+  const openExportImg = useOpenExportImg();
   const fileInput = useRef<HTMLInputElement>(null);
   const [typeList, setTypeList] = useState(initialTypeList);
   const [currentModel, setCurrentModel] = useState(msgType.nikke);
@@ -46,10 +42,17 @@ const NikkeDialog = ({
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
+  const preview = useRef<HTMLAnchorElement | null>(null);
   const [dialogData, setDialogData] = useState(initialData);
-  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
-    null
-  );
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+
+  const [imgData, setImgData] = useState({
+    scale: 2,
+    quality: 0.95,
+    exportType: '0',
+    imgName: dialogData.name,
+    mark: true,
+  });
 
   function selectModel(type: msgType) {
     setInputPlaceholder('请输入对话内容');
@@ -152,10 +155,7 @@ const NikkeDialog = ({
       nikke: dialogData.projectNikkes[currentNikke],
     };
 
-    if (
-      isOC &&
-      (currentModel === msgType.nikke || currentModel === msgType.img)
-    ) {
+    if (isOC && (currentModel === msgType.nikke || currentModel === msgType.img)) {
       newInfo.nikke = {
         name: '指挥官',
         img: '指挥官',
@@ -178,47 +178,31 @@ const NikkeDialog = ({
 
     setInputContent('');
     saveMsg(dialogData);
-  }, [
-    dialogData,
-    currentModel,
-    currentNikke,
-    isOC,
-    currentSelectImage,
-    inputContent,
-    saveMsg,
-  ]);
+  }, [dialogData, currentModel, currentNikke, isOC, currentSelectImage, inputContent, saveMsg]);
 
   const append = () => {
     // 当前模式和最后对话的模式不同 即最后对话的是img则无需进行添加
     if (currentModel === msgType.img && currentSelectImage !== -1) {
       // 如果想最加图片则必须使得msgType为追加图片
-      dialogData.messageData.list[
-        dialogData.messageData.list.length - 1
-      ].msgType.push(`[url][base64:] [${currentSelectImage}]`);
+      dialogData.messageData.list[dialogData.messageData.list.length - 1].msgType.push(
+        `[url][base64:] [${currentSelectImage}]`
+      );
     } else if (
-      dialogData.messageData.list[dialogData.messageData.list.length - 1]
-        .msgType === msgType.img
+      dialogData.messageData.list[dialogData.messageData.list.length - 1].msgType === msgType.img
     ) {
       let model: msgType = msgType.nikke;
       // 如果最后一项是指挥官则修改为指挥官
       if (
-        dialogData.messageData.list[dialogData.messageData.list.length - 1]
-          .nikke.img === '指挥官'
+        dialogData.messageData.list[dialogData.messageData.list.length - 1].nikke.img === '指挥官'
       ) {
         model = msgType.commander;
       }
       // 如果最后一项是图片 且追加类型不等于图片则修改最后一项的类型
-      dialogData.messageData.list[
-        dialogData.messageData.list.length - 1
-      ].msgType = model;
+      dialogData.messageData.list[dialogData.messageData.list.length - 1].msgType = model;
 
-      dialogData.messageData.list[
-        dialogData.messageData.list.length - 1
-      ].msg.push(inputContent);
+      dialogData.messageData.list[dialogData.messageData.list.length - 1].msg.push(inputContent);
     } else {
-      dialogData.messageData.list[
-        dialogData.messageData.list.length - 1
-      ].msg.push(inputContent);
+      dialogData.messageData.list[dialogData.messageData.list.length - 1].msg.push(inputContent);
 
       setInputContent('');
       saveMsg(dialogData);
@@ -262,214 +246,311 @@ const NikkeDialog = ({
     setDialogData(newDialogData);
   }
 
+  const cancel = () => {
+    openExportImg.close();
+  };
+
+  enum exportImgState {
+    pause,
+    run,
+  }
+  const [currentExportImgState, setCurrentExportImgState] = useState(exportImgState.pause);
+  const [dialogImg, setDialogImg] = useState<any>(null);
+
+  /*  const exportRealToImg = async () => {
+    switch (imgData.exportType) {
+      case exportImgType.png.toString():
+        setCurrentExportImgState(exportImgState.run);
+        try {
+          if (dialogImg != undefined) {
+            domtoimage
+              .toPng(dialogImg, {
+                width: dialogImg.clientWidth * imgData.scale,
+                height: dialogImg.clientHeight * imgData.scale,
+              })
+              .then((dataUrl: string) => {
+                saveAs(dataUrl, `${imgData.imgName}.png`);
+
+                var img = new Image();
+                img.src = dataUrl;
+                preview.current?.appendChild(img);
+
+                if (dialogImg != undefined) {
+                  dialogImg.style.transfrom = `scale(${1})`;
+                }
+                setCurrentExportImgState(exportImgState.pause);
+              })
+              .catch((error: any) => {
+                setCurrentExportImgState(exportImgState.pause);
+                console.error('oops, something went wrong!', error);
+              });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      case exportImgType.jpeg.toString():
+        setCurrentExportImgState(exportImgState.run);
+        try {
+          if (dialogImg != undefined) {
+            domtoimage
+              .toPng(dialogImg, {
+                width: dialogImg.clientWidth * imgData.scale,
+                height: dialogImg.clientHeight * imgData.scale,
+                quality: imgData.quality,
+                style: {
+                  transform: 'scale(' + imgData.scale + ')',
+                  transformOrigin: 'top left',
+                },
+              })
+              .then((dataUrl: string) => {
+                saveAs(dataUrl, `${imgData.imgName}.jpeg`);
+
+                var img = new Image();
+                img.src = dataUrl;
+                preview.current?.appendChild(img);
+
+                if (dialogImg != undefined) {
+                  dialogImg.style.transfrom = `scale(${1})`;
+                }
+                setCurrentExportImgState(exportImgState.pause);
+              })
+              .catch((error: any) => {
+                setCurrentExportImgState(exportImgState.pause);
+                console.error('oops, something went wrong!', error);
+              });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      default:
+        break;
+    }
+    console.log(222);
+  };
+
+  useEffect(() => {
+    // 判断是否在客户端执行
+    if (typeof window !== 'undefined') {
+      exportRealToImg();
+    }
+  }, [dialogImg, exportImgState, imgData]); */
+
   return (
-    <div className={styles.dialog}>
-      <div className={styles.dheader}>
-        <div className={styles.title}>
-          <span style={{ verticalAlign: 'middle' }}>
-            <Image src="/wifi.png" alt=" Logo" width={20} height={14} />
-          </span>
-          <span style={{ marginLeft: '5px' }}>
-            <Timer currentTime={currentTime} />
-          </span>
-        </div>
-        <div className={styles.dback} onClick={() => back(dialogData)}>
-          <div className={styles.dtitle}>
-            <Image
-              src="/back.png"
-              alt=" back"
-              width={25}
-              height={25}
-              style={{ marginTop: '2px' }}
-            />
-            <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
+    <>
+      <div className={styles.dialog}>
+        <div className={styles.dheader}>
+          <div className={styles.title}>
+            <span style={{ verticalAlign: 'middle' }}>
+              <Image src="/wifi.png" alt=" Logo" width={20} height={14} />
+            </span>
+            <span style={{ marginLeft: '5px' }}>
+              <Timer currentTime={currentTime} />
+            </span>
+          </div>
+          <div className={styles.dback} onClick={() => back(dialogData)}>
+            <div className={styles.dtitle}>
+              <Image
+                src="/back.png"
+                alt=" back"
+                width={25}
+                height={25}
+                style={{ marginTop: '2px' }}
+              />
+              <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.dcontent} ref={(ref) => setScrollContainer(ref)}>
-        {dialogData.messageData.list.map((value: any, index: any) => (
-          <NikkeMessage
-            key={index}
-            type={value.msgType}
-            msgs={value.msg}
-            index={index}
-            currentData={totalImages}
-            dialogData={dialogData}
-            isEdit={true}
-            nikke={value.nikke}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
-
-      <div style={{ position: 'relative', bottom: 0, width: '100%' }}>
-        <div className={styles.dmodel}>
-          {typeList.map((value, index) => (
-            <span
-              className={`${styles.dmodelView} ${
-                currentModel === value ? styles.selectModel : ''
-              }`}
-              onClick={() => selectModel(value)}
+        <div className={styles.dcontent} ref={(ref) => setScrollContainer(ref)}>
+          {dialogData.messageData.list.map((value: any, index: any) => (
+            <NikkeMessage
               key={index}
-            >
-              {value}
-            </span>
+              type={value.msgType}
+              msgs={value.msg}
+              index={index}
+              currentData={totalImages}
+              dialogData={dialogData}
+              isEdit={true}
+              nikke={value.nikke}
+              onDelete={handleDelete}
+            />
           ))}
-
-          <span
-            className={`${styles.dmodelView} ${styles.export}`}
-            style={{ marginLeft: 'auto', width: '80px' }}
-          >
-            导出图片
-          </span>
         </div>
-        {isSelectView && (
-          <>
-            <div
-              className={`${styles.selectNikkeInfo} ${styles.last}`}
-              onClick={selectOC}
+
+        <div style={{ position: 'relative', bottom: 0, width: '100%' }}>
+          <div className={styles.dmodel}>
+            {typeList.map((value, index) => (
+              <span
+                className={`${styles.dmodelView} ${
+                  currentModel === value ? styles.selectModel : ''
+                }`}
+                onClick={() => selectModel(value)}
+                key={index}
+              >
+                {value}
+              </span>
+            ))}
+
+            <span
+              className={`${styles.dmodelView} ${styles.export}`}
+              style={{ marginLeft: 'auto', width: '80px' }}
+              onClick={() => openExportImg.open()}
             >
-              指
-            </div>
-            <div className={styles.dselectnikke}>
-              {dialogData?.projectNikkes.map((value: any, index: number) => (
-                <div
-                  className={styles.selectNikkeInfo}
-                  style={{
-                    backgroundImage: `url(avatars/${value.img}.png)`,
-                  }}
-                  key={index}
-                  onClick={() => selectNikke(index)}
-                ></div>
-              ))}
-            </div>
-          </>
-        )}
-        {/*  {isSelectView && (
+              导出图片
+            </span>
+          </div>
+          {isSelectView && (
+            <>
+              <div className={`${styles.selectNikkeInfo} ${styles.last}`} onClick={selectOC}>
+                指
+              </div>
+              <div className={styles.dselectnikke}>
+                {dialogData?.projectNikkes.map((value: any, index: number) => (
+                  <div
+                    className={styles.selectNikkeInfo}
+                    style={{
+                      backgroundImage: `url(avatars/${value.img}.png)`,
+                    }}
+                    key={index}
+                    onClick={() => selectNikke(index)}
+                  ></div>
+                ))}
+              </div>
+            </>
+          )}
+          {/*  {isSelectView && (
          
         )} */}
 
-        {isImgListView && (
-          <div className={styles.imgList}>
-            {totalImages.map((value, index) => (
-              <div key={index}>
-                <div style={{ width: '96px', height: '96px' }}>
-                  <Image
-                    src={value}
-                    width={96}
-                    height={96}
-                    alt=""
-                    className={
-                      currentSelectImage === index
-                        ? styles.isSelectImageView
-                        : ''
-                    }
-                    style={{
-                      boxSizing: 'border-box',
-                      backgroundColor: '#c6c6c6',
-                      borderRadius: '5px',
-                      border: '2px solid #c6c6c6',
-                      transition: 'border 0.1s ease-in-out',
-                    }}
-                    onClick={() => selectImage(index)}
-                  />
+          {isImgListView && (
+            <div className={styles.imgList}>
+              {totalImages.map((value, index) => (
+                <div key={index}>
+                  <div style={{ width: '96px', height: '96px' }}>
+                    <Image
+                      src={value}
+                      width={96}
+                      height={96}
+                      alt=""
+                      className={currentSelectImage === index ? styles.isSelectImageView : ''}
+                      style={{
+                        boxSizing: 'border-box',
+                        backgroundColor: '#c6c6c6',
+                        borderRadius: '5px',
+                        border: '2px solid #c6c6c6',
+                        transition: 'border 0.1s ease-in-out',
+                      }}
+                      onClick={() => selectImage(index)}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
-            <div
-              style={{
-                fontSize: '64px',
-                color: 'black',
-                width: '96px',
-                height: '96px',
-                textAlign: 'center',
-                border: '1px solid skyblue',
-                borderRadius: '10px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              onClick={openFile}
-            >
-              <span style={{ marginTop: '-11px' }}> + </span>
-            </div>
-          </div>
-        )}
-
-        <div className={styles.nikkeedit}>
-          <div
-            className={`${styles.selectNikkeInfo} ${isOC ? styles.zhg : ''}`}
-            style={{
-              backgroundImage: `url(avatars/${dialogData?.projectNikkes[currentNikke].img}.png)`,
-            }}
-            onClick={show}
-          >
-            {isOC && (
-              <span
-                style={{
-                  color: 'rgb(92, 58, 58)',
-                  lineHeight: '32px',
-                  textAlign: 'center',
-                  width: '100%',
-                  display: 'inline-block',
-                }}
-              >
-                指挥官
-              </span>
-            )}
-          </div>
-          <div className={styles.upload} onClick={openFileInput}>
-            <Image src="/image.png" alt="" width={32} height={32} />
-          </div>
-          <input
-            id="fileInput"
-            type="file"
-            ref={fileInput}
-            style={{ display: 'none' }}
-            onChange={handleFileUpload}
-            accept="image/*"
-            multiple
-          />
-
-          <input
-            ref={inputRef}
-            type="text"
-            className="nikkeInput dinput"
-            value={inputContent}
-            onChange={(e) => {
-              setInputContent(e.target.value);
-              check();
-            }}
-            onFocus={check}
-            onKeyUp={(e) => {
-              if (e.key === 'Enter') {
-                add();
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Tab') {
-                append();
-              }
-            }}
-            placeholder={inputPlaceholder}
-          />
-          <div className={`${styles.add} ${styles.newadd}`} onClick={add}>
-            新增
-          </div>
-          {currentModel !== msgType.aside &&
-            currentModel !== msgType.partition && (
               <div
-                className={`${styles.add} ${styles.oldadd}`}
-                onClick={append}
+                style={{
+                  fontSize: '64px',
+                  color: 'black',
+                  width: '96px',
+                  height: '96px',
+                  textAlign: 'center',
+                  border: '1px solid skyblue',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onClick={openFile}
               >
+                <span style={{ marginTop: '-11px' }}> + </span>
+              </div>
+            </div>
+          )}
+
+          <div className={styles.nikkeedit}>
+            <div
+              className={`${styles.selectNikkeInfo} ${isOC ? styles.zhg : ''}`}
+              style={{
+                backgroundImage: `url(avatars/${dialogData?.projectNikkes[currentNikke].img}.png)`,
+              }}
+              onClick={show}
+            >
+              {isOC && (
+                <span
+                  style={{
+                    color: 'rgb(92, 58, 58)',
+                    lineHeight: '32px',
+                    textAlign: 'center',
+                    width: '100%',
+                    display: 'inline-block',
+                  }}
+                >
+                  指挥官
+                </span>
+              )}
+            </div>
+            <div className={styles.upload} onClick={openFileInput}>
+              <Image src="/image.png" alt="" width={32} height={32} />
+            </div>
+            <input
+              id="fileInput"
+              type="file"
+              ref={fileInput}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+              accept="image/*"
+              multiple
+            />
+
+            <input
+              ref={inputRef}
+              type="text"
+              className={`nikkeInput ${styles.dinput}`}
+              value={inputContent}
+              onChange={(e) => {
+                setInputContent(e.target.value);
+                check();
+              }}
+              onFocus={check}
+              onKeyUp={(e) => {
+                if (e.key === 'Enter') {
+                  add();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Tab') {
+                  append();
+                }
+              }}
+              placeholder={inputPlaceholder}
+            />
+            <div className={`${styles.add} ${styles.newadd}`} onClick={add}>
+              新增
+            </div>
+            {currentModel !== msgType.aside && currentModel !== msgType.partition && (
+              <div className={`${styles.add} ${styles.oldadd}`} onClick={append}>
                 追加
               </div>
             )}
+          </div>
         </div>
       </div>
-    </div>
+      {openExportImg.isOpen && (
+        <>
+          <NikkeWindow
+            title="导出图片"
+            buttonSuccess="创建"
+            buttonCancel="取消"
+            success={() => {}}
+            cancel={cancel}
+            confirm={true}
+          >
+            <ExportImgContent imgData={imgData} setImgData={setImgData} preview={preview} />
+          </NikkeWindow>
+        </>
+      )}
+    </>
   );
 };
 

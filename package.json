@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@intactile/dom-to-image-next": "^3.0.3",
+    "@types/dom-to-image": "^2.6.7",
+    "dom-to-image-more": "^3.2.0",
+    "file-saver": "^2.0.5",
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
@@ -16,6 +20,7 @@
     "zustand": "^4.4.6"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

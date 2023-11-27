@@ -235,7 +235,7 @@ export default function Home() {
         </div>
         {createProject.isOpen && (
           <NikkeWindow
-            title="Nikke Chat 生成器"
+            title="Nikke blabla"
             confirm={true}
             buttonSuccess="创建"
             buttonCancel="取消"
