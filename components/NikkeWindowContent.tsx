@@ -34,7 +34,7 @@ const NikkeWindowContent = ({
   isSelect,
   select,
 }: NikkeWindowContentProps) => {
-  const [selectedEnterprise, setSelectedEnterprise] = useState(null);
+  const [selectedEnterprise, setSelectedEnterprise] = useState(0);
   const [filteredNikkes, setFilteredNikkes] = useState(nikkeData.nikkes);
 
   const selectEnterprise = (enterprise: any) => {
