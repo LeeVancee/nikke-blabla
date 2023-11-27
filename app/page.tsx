@@ -3,7 +3,7 @@ import Image from 'next/image';
 import styles from './page.module.css';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  /* ChatMessageData, */ Project,
+  Project,
   ProjectType,
   buttonType,
   IProjectData,
@@ -76,11 +76,6 @@ export default function Home() {
   );
 
   const buttonStyle = { width: '150px', height: '45px', margin: '5px' };
-
-  // 辅助函数，检查是否是多选
-  /*   const isMultipleSelection = useCallback(() => {
-    return isSelect.length > 1 && isSelect.some((isSelected) => isSelected);
-  }, [isSelect]); */
 
   function select(value: any, index: any) {
     setProName((prevProName) => {
