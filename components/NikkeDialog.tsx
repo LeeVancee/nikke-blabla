@@ -382,7 +382,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
         <div style={{ position: 'relative', bottom: 0, width: '100%' }}>
           <div className={styles.dmodel}>
             {typeList.map((value, index) => (
-              <span
+              <div
                 className={`${styles.dmodelView} ${
                   currentModel === value ? styles.selectModel : ''
                 }`}
@@ -390,7 +390,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
                 key={index}
               >
                 {value}
-              </span>
+              </div>
             ))}
 
             <span

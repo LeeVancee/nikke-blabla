@@ -20,7 +20,18 @@ interface NikkeWindowContentProps {
   select: (value: any, index: number) => void;
 }
 
-const enterprises = ['All', '极乐净土', '米西里斯', '泰特拉', '朝圣者', '反常'];
+const enterprises = [
+  'All',
+  '极乐净土',
+  '米西里斯',
+  '泰特拉',
+  '朝圣者',
+  '反常',
+  '配角',
+  '主角',
+  '动物',
+  '莱彻',
+];
 
 const NikkeWindowContent = ({
   proName,
@@ -68,7 +79,7 @@ const NikkeWindowContent = ({
           />
         </div>
         <div className={styles.pcontent}>
-          <span>对话类型 </span>
+          <span>对话类型</span>
           <NikkeRadio label="任务" checked={true} style={{ flex: 1 }}>
             <div
               style={{
@@ -144,9 +155,7 @@ const NikkeWindowContent = ({
               {enterprises.map((value, index) => (
                 <div
                   className={`${styles.enterpriseBox} ${
-                    selectedEnterprise === index
-                      ? styles.selectedEnterprise
-                      : ''
+                    selectedEnterprise === index ? styles.selectedEnterprise : ''
                   }`}
                   key={index}
                   onClick={() => selectEnterprise(index)}
@@ -156,24 +165,21 @@ const NikkeWindowContent = ({
               ))}
             </div>
             <div className={styles.nikkeGrid}>
-              {filteredNikkes.map((value, index) => (
-                <div
-                  className={`${styles.nikke} ${
-                    isSelect[index] ? styles.nikkeCheck : ''
-                  }`}
-                  onClick={() => {
-                    select(value, index);
-                  }}
-                  key={index}
-                >
-                  <Image
-                    src={`/avatars/${value.img}.png`}
-                    alt="grid"
-                    width={60}
-                    height={60}
-                  />
-                </div>
-              ))}
+              {filteredNikkes.length > 0 ? (
+                filteredNikkes.map((value, index) => (
+                  <div
+                    className={`${styles.nikke} ${isSelect[index] ? styles.nikkeCheck : ''}`}
+                    onClick={() => {
+                      select(value, index);
+                    }}
+                    key={index}
+                  >
+                    <Image src={`/avatars/${value.img}.png`} alt="grid" width={60} height={60} />
+                  </div>
+                ))
+              ) : (
+                <span className={styles.noNikkeData}>NO DATA</span>
+              )}
             </div>
           </div>
         )}
