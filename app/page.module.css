@@ -136,6 +136,12 @@
   width: 30%;
   line-height: 25px;
 }
+.pcontent > span {
+  font-size: 12px;
+  min-width: 96px; /*限制宽度*/
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .pcontent {
   display: flex;

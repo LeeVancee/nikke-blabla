@@ -109,6 +109,7 @@ input[type='radio']:checked + label {
   min-height: 25px;
   transition: all 0.4s ease-in-out;
   outline-color: transparent;
+  width: 70%;
 }
 
 .nikkeInput:focus {
