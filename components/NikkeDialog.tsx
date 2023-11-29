@@ -15,9 +15,10 @@ import NikkeMessage from './NikkeMessage';
 import useOpenExportImg from '@/hooks/useOpenExportImg';
 import NikkeWindow from './NikkeWindow';
 import ExportImgContent from './ExportImgContent';
-import domtoimage from 'dom-to-image-more';
 import { saveAs } from 'file-saver';
 import ExportMessage from '@/components/exportOnly/ExportMessage';
+
+import html2canvas from 'html2canvas';
 
 interface NikkeDialogProps {
   dialogData: any;
@@ -269,20 +270,16 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
       setCurrentExportImgState(exportImgState.run);
 
       if (dialogImg.current != undefined) {
-        domtoimage
-          .toPng(dialogImg.current, {
-            width: dialogImg.current.clientWidth * scale,
-            height: dialogImg.current.clientHeight * scale,
-            style: {
-              transform: 'scale(' + scale + ')',
-              transformOrigin: 'top left',
-            },
-          })
-          .then((dataUrl: string) => {
-            saveAs(dataUrl, `${imgName}.png`);
+        html2canvas(dialogImg.current, {
+          width: dialogImg.current.clientWidth,
+          height: dialogImg.current.clientHeight,
+          scale: scale,
+        })
+          .then((canvas) => {
+            saveAs(canvas.toDataURL(), `${imgName}.png`);
 
             const img = document.createElement('img');
-            img.src = dataUrl;
+            img.src = canvas.toDataURL();
 
             preview.current?.appendChild(img);
             if (preview.current) {
@@ -300,21 +297,16 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     } else if (exportType === exportImgType.jpeg.toString()) {
       setCurrentExportImgState(exportImgState.run);
       if (dialogImg.current != undefined) {
-        domtoimage
-          .toJpeg(dialogImg.current, {
-            width: dialogImg.current.clientWidth * scale,
-            height: dialogImg.current.clientHeight * scale,
-            quality: quality,
-            style: {
-              transform: 'scale(' + scale + ')',
-              transformOrigin: 'top left',
-            },
-          })
-          .then((dataUrl: string) => {
-            saveAs(dataUrl, `${imgName}.png`);
+        html2canvas(dialogImg.current, {
+          width: dialogImg.current.clientWidth,
+          height: dialogImg.current.clientHeight,
+          scale: scale,
+        })
+          .then((canvas) => {
+            saveAs(canvas.toDataURL(), `${imgName}.jpeg`);
 
             const img = document.createElement('img');
-            img.src = dataUrl;
+            img.src = canvas.toDataURL();
 
             preview.current?.appendChild(img);
 
@@ -600,6 +592,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
                   alt=" back"
                   style={{ marginTop: '2px', width: '25px', height: '25px' }}
                 />
+
                 <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
               </div>
               {mark && (
