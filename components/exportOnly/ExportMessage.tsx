@@ -1,5 +1,4 @@
 'use client';
-import NikkeMsgEdit from '@/components/NikkeMsgEdit';
 import { INikkeData, Project, msgType } from '@/script/project';
 import { useEffect, useRef, useState } from 'react';
 import styles from '../css/NikkeMessage.module.css';
@@ -13,19 +12,14 @@ interface NikkeMessageProps {
   currentData: string[];
   dialogData: Project;
   isEdit: boolean;
-  onDelete: (index: number) => void;
-  // setDialogData: React.Dispatch<React.SetStateAction<Project>>;
 }
 
 const NikkeMessage = ({
   msgs: initialMsgs,
   nikke,
   type,
-  index: currentIndex,
   currentData,
   dialogData: initialData,
-  isEdit,
-  onDelete,
 }: NikkeMessageProps) => {
   const [dialogData, setDialogData] = useState(initialData);
   const [msgs, setMsgs] = useState(initialMsgs);
@@ -53,36 +47,6 @@ const NikkeMessage = ({
     msgs[index] = editContent;
     console.log('失去焦点');
   };
-
-  const addMsg = (index: number, isUpDown: number) => {
-    /*  if (isUpDown == 0) {
-      msgs.splice(index, 0, '插入的数据');
-    } else if (isUpDown == 1) {
-      msgs.splice(index + 1, 0, '插入的数据');
-    } */
-  };
-  const editMsg = (index: number) => {
-    if (editInputs.includes(index)) {
-      lostfocus(index);
-    } else {
-      setEditInputs([index]);
-      setEditContent(msgs[index]);
-    }
-  };
-  function deleteMsg(index: any) {
-    const newMsgs = [...msgs];
-
-    if (msgs.length === 1) {
-      newMsgs.splice(index, 1);
-
-      setMsgs(newMsgs);
-
-      onDelete(currentIndex);
-    } else {
-      msgs.splice(index, 1);
-    }
-    console.log('删除');
-  }
 
   const parseImgToDataURL = (content: string) => {
     let value = content.split(' ');
@@ -129,14 +93,6 @@ const NikkeMessage = ({
                   </span>
                 )}
                 <img src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
-                {isEdit && (
-                  <NikkeMsgEdit
-                    add={addMsg}
-                    edit={editMsg}
-                    deleted={deleteMsg}
-                    currentIndex={index}
-                  />
-                )}
               </div>
             ))}
           </div>
@@ -176,14 +132,6 @@ const NikkeMessage = ({
                 </>
               )}
               <img src="/rg.png" alt="" width={16} height={16} className={styles.znikkeImg} />
-              {isEdit && (
-                <NikkeMsgEdit
-                  add={addMsg}
-                  edit={editMsg}
-                  deleted={deleteMsg}
-                  currentIndex={index}
-                />
-              )}
             </div>
           ))}
         </div>
@@ -203,14 +151,6 @@ const NikkeMessage = ({
                 />
               </span>
               <img src="/rg.png" alt="" width={16} height={16} className={styles.znikkeImg} />
-              {isEdit && (
-                <NikkeMsgEdit
-                  add={addMsg}
-                  edit={editMsg}
-                  deleted={deleteMsg}
-                  currentIndex={index}
-                />
-              )}
             </div>
           ))}
         </div>
@@ -218,10 +158,9 @@ const NikkeMessage = ({
 
       {type === msgType.img && nikke.img !== '指挥官' && (
         <div className={styles.msg}>
-          <div
-            className={styles.head}
-            style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}
-          ></div>
+          <div className={styles.head}>
+            <img src={`avatars/${nikke.img}.png`} alt="avatar" />
+          </div>
           <div className={styles.textgroup}>
             <div className={styles.name}>{nikke.name}</div>
             {msgs.map((value, index) => (
@@ -238,14 +177,6 @@ const NikkeMessage = ({
                   )}
                 </span>
                 <img src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
-                {isEdit && (
-                  <NikkeMsgEdit
-                    add={addMsg}
-                    edit={editMsg}
-                    deleted={deleteMsg}
-                    currentIndex={index}
-                  />
-                )}
               </div>
             ))}
           </div>

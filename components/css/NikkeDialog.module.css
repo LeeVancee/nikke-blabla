@@ -137,10 +137,6 @@
   overflow-y: scroll;
 }
 
-.preview > img {
-  width: 100%;
-}
-
 .isSelectImageView {
   border: 5px #32b1f4 solid !important;
 }
@@ -499,4 +495,12 @@ div.dcontent::-webkit-scrollbar {
   background-size: 5px 5px;
   background-position: center;
   background-color: #fda912;
+}
+
+.preview > canvas {
+  max-width: 100%;
+}
+
+.preview > img {
+  width: 100%;
 }

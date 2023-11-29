@@ -271,20 +271,19 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
 
       if (dialogImg.current != undefined) {
         html2canvas(dialogImg.current, {
-          width: dialogImg.current.clientWidth,
-          height: dialogImg.current.clientHeight,
+          allowTaint: true,
+          useCORS: true,
           scale: scale,
         })
           .then((canvas) => {
             saveAs(canvas.toDataURL(), `${imgName}.png`);
 
             const img = document.createElement('img');
+            img.crossOrigin = 'anonymous';
             img.src = canvas.toDataURL();
 
             preview.current?.appendChild(img);
-            if (preview.current) {
-              preview.current.style.overflow = 'hidden';
-            }
+
             if (dialogImg.current != undefined) {
               dialogImg.current.style.transform = `scale(${1})`;
             }
@@ -292,14 +291,15 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
           })
           .catch((error: any) => {
             console.error('oops, something went wrong!', error);
+            alert(error);
           });
       }
     } else if (exportType === exportImgType.jpeg.toString()) {
       setCurrentExportImgState(exportImgState.run);
       if (dialogImg.current != undefined) {
         html2canvas(dialogImg.current, {
-          width: dialogImg.current.clientWidth,
-          height: dialogImg.current.clientHeight,
+          useCORS: true,
+          allowTaint: true,
           scale: scale,
         })
           .then((canvas) => {
@@ -622,7 +622,6 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
                 dialogData={dialogData}
                 isEdit={true}
                 nikke={value.nikke}
-                onDelete={handleDelete}
               />
             ))}
           </div>
