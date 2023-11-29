@@ -279,7 +279,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
             },
           })
           .then((dataUrl: string) => {
-            //   saveAs(dataUrl, `${imgName}.png`);
+            saveAs(dataUrl, `${imgName}.png`);
 
             const img = document.createElement('img');
             img.src = dataUrl;
@@ -311,7 +311,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
             },
           })
           .then((dataUrl: string) => {
-            //  saveAs(dataUrl, `${imgName}.png`);
+            saveAs(dataUrl, `${imgName}.png`);
 
             const img = document.createElement('img');
             img.src = dataUrl;
