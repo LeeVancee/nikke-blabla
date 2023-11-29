@@ -95,7 +95,6 @@ const NikkeWindowContent = ({
                   value="0"
                   name="projectType"
                   onChange={handleTypeChange}
-                  checked={selectType === '0'}
                 />
                 <label htmlFor="task">任务</label>
               </div>
@@ -106,7 +105,7 @@ const NikkeWindowContent = ({
                   value="1"
                   name="projectType"
                   onChange={handleTypeChange}
-                  checked={selectType === '1'}
+                  defaultChecked
                 />
                 <label htmlFor="nikke">妮姬</label>
               </div>
@@ -117,7 +116,6 @@ const NikkeWindowContent = ({
                   value="2"
                   name="projectType"
                   onChange={handleTypeChange}
-                  checked={selectType === '2'}
                 />
                 <label htmlFor="group">群组</label>
               </div>

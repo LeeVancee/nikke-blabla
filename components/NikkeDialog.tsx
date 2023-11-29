@@ -17,6 +17,7 @@ import NikkeWindow from './NikkeWindow';
 import ExportImgContent from './ExportImgContent';
 import domtoimage from 'dom-to-image-more';
 import { saveAs } from 'file-saver';
+import ExportMessage from '@/components/exportOnly/ExportMessage';
 
 interface NikkeDialogProps {
   dialogData: any;
@@ -42,17 +43,8 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
-  const preview = useRef<HTMLAnchorElement | null>(null);
   const [dialogData, setDialogData] = useState(initialData);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
-
-  const [imgData, setImgData] = useState({
-    scale: 2,
-    quality: 0.95,
-    exportType: '0',
-    imgName: dialogData.name,
-    mark: true,
-  });
 
   function selectModel(type: msgType) {
     setInputPlaceholder('请输入对话内容');
@@ -254,88 +246,131 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     pause,
     run,
   }
+
+  const [scale, setScale] = useState(2);
+  const [quality, setQuality] = useState(0.95);
+  const [exportType, setExportType] = useState('0');
+  const [imgName, setImgName] = useState(dialogData.name);
+  const [mark, setMark] = useState(true);
+
   const [currentExportImgState, setCurrentExportImgState] = useState(exportImgState.pause);
-  const [dialogImg, setDialogImg] = useState<any>(null);
+  const preview = useRef<HTMLDivElement | null>(null);
+  const dialogImg = useRef<HTMLDivElement | null>(null);
+  const dialogHeader = useRef<HTMLDivElement | null>(null);
+  const dialogContent = useRef<HTMLDivElement | null>(null);
+  const [imgConfig, setImgConfig] = useState<ImgConfig>({
+    width: 500,
+    maxWidth: 550,
+    bottomHeigth: 15,
+  });
 
-  /*  const exportRealToImg = async () => {
-    switch (imgData.exportType) {
-      case exportImgType.png.toString():
-        setCurrentExportImgState(exportImgState.run);
-        try {
-          if (dialogImg != undefined) {
-            domtoimage
-              .toPng(dialogImg, {
-                width: dialogImg.clientWidth * imgData.scale,
-                height: dialogImg.clientHeight * imgData.scale,
-              })
-              .then((dataUrl: string) => {
-                saveAs(dataUrl, `${imgData.imgName}.png`);
+  const exportRealToImg = () => {
+    if (exportType === exportImgType.png.toString()) {
+      setCurrentExportImgState(exportImgState.run);
 
-                var img = new Image();
-                img.src = dataUrl;
-                preview.current?.appendChild(img);
+      if (dialogImg.current != undefined) {
+        domtoimage
+          .toPng(dialogImg.current, {
+            width: dialogImg.current.clientWidth * scale,
+            height: dialogImg.current.clientHeight * scale,
+            style: {
+              transform: 'scale(' + scale + ')',
+              transformOrigin: 'top left',
+            },
+          })
+          .then((dataUrl: string) => {
+            //   saveAs(dataUrl, `${imgName}.png`);
 
-                if (dialogImg != undefined) {
-                  dialogImg.style.transfrom = `scale(${1})`;
-                }
-                setCurrentExportImgState(exportImgState.pause);
-              })
-              .catch((error: any) => {
-                setCurrentExportImgState(exportImgState.pause);
-                console.error('oops, something went wrong!', error);
-              });
-          }
-        } catch (error) {
-          console.log(error);
-        }
-        break;
-      case exportImgType.jpeg.toString():
-        setCurrentExportImgState(exportImgState.run);
-        try {
-          if (dialogImg != undefined) {
-            domtoimage
-              .toPng(dialogImg, {
-                width: dialogImg.clientWidth * imgData.scale,
-                height: dialogImg.clientHeight * imgData.scale,
-                quality: imgData.quality,
-                style: {
-                  transform: 'scale(' + imgData.scale + ')',
-                  transformOrigin: 'top left',
-                },
-              })
-              .then((dataUrl: string) => {
-                saveAs(dataUrl, `${imgData.imgName}.jpeg`);
+            const img = document.createElement('img');
+            img.src = dataUrl;
 
-                var img = new Image();
-                img.src = dataUrl;
-                preview.current?.appendChild(img);
+            preview.current?.appendChild(img);
+            if (preview.current) {
+              preview.current.style.overflow = 'hidden';
+            }
+            if (dialogImg.current != undefined) {
+              dialogImg.current.style.transform = `scale(${1})`;
+            }
+            setCurrentExportImgState(exportImgState.pause);
+          })
+          .catch((error: any) => {
+            console.error('oops, something went wrong!', error);
+          });
+      }
+    } else if (exportType === exportImgType.jpeg.toString()) {
+      setCurrentExportImgState(exportImgState.run);
+      if (dialogImg.current != undefined) {
+        domtoimage
+          .toJpeg(dialogImg.current, {
+            width: dialogImg.current.clientWidth * scale,
+            height: dialogImg.current.clientHeight * scale,
+            quality: quality,
+            style: {
+              transform: 'scale(' + scale + ')',
+              transformOrigin: 'top left',
+            },
+          })
+          .then((dataUrl: string) => {
+            //  saveAs(dataUrl, `${imgName}.png`);
 
-                if (dialogImg != undefined) {
-                  dialogImg.style.transfrom = `scale(${1})`;
-                }
-                setCurrentExportImgState(exportImgState.pause);
-              })
-              .catch((error: any) => {
-                setCurrentExportImgState(exportImgState.pause);
-                console.error('oops, something went wrong!', error);
-              });
-          }
-        } catch (error) {
-          console.log(error);
-        }
-        break;
-      default:
-        break;
+            const img = document.createElement('img');
+            img.src = dataUrl;
+
+            preview.current?.appendChild(img);
+
+            if (dialogImg.current != undefined) {
+              dialogImg.current.style.transform = `scale(${1})`;
+            }
+            setCurrentExportImgState(exportImgState.pause);
+          })
+          .catch((error: any) => {
+            console.error('oops, something went wrong!', error);
+          });
+      }
+    } else {
+      console.log('图片格式不支持');
     }
-    console.log(222);
   };
-
-  useEffect(() => {
-    // 判断是否在客户端执行
-    if (typeof window !== 'undefined') {
-      exportRealToImg();
+  function clamp(vaule: number, min: number, max: number) {
+    if (vaule < min) {
+      return min;
     }
-  }, [dialogImg, exportImgState, imgData]); */
+
+    if (vaule > max) {
+      return max;
+    }
+
+    return vaule;
+  }
+
+  // 处理函数
+  const handleExportType = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExportType(e.target.value);
+  };
+  const handleImgName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImgName(e.target.value);
+  };
+  const handleScale = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setScale(Number(e.target.value));
+  };
+  const handleQuality = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuality(Number(e.target.value));
+  };
+  const handleMark = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMark(e.target.checked);
+  };
+  const props = {
+    mark,
+    imgName,
+    exportType,
+    scale,
+    quality,
+    handleImgName,
+    handleExportType,
+    handleQuality,
+    handleScale,
+    handleMark,
+  };
 
   return (
     <>
@@ -537,16 +572,80 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
         </div>
       </div>
       {openExportImg.isOpen && (
+        <div
+          className={styles.dialogImg}
+          style={{
+            height: `${
+              (dialogHeader.current == null
+                ? 80
+                : clamp(dialogHeader.current.clientHeight, 70, 90)) +
+              (dialogContent.current == null
+                ? 50
+                : clamp(dialogContent.current.scrollHeight + imgConfig.bottomHeigth, 150, 99999999))
+            }px !important`,
+          }}
+          ref={dialogImg}
+        >
+          <div className={`${styles.dheader} ${styles.hImg}`} ref={dialogHeader}>
+            <div className={styles.title}>
+              <span style={{ verticalAlign: 'middle' }}>
+                <img src="/wifi.png" alt=" Logo" style={{ width: '20px', height: '14px' }} />
+              </span>
+              <Timer currentTime={currentTime} />
+            </div>
+            <div className={styles.dback} onClick={() => back(dialogData)}>
+              <div className={styles.dtitle}>
+                <img
+                  src="/back.png"
+                  alt=" back"
+                  style={{ marginTop: '2px', width: '25px', height: '25px' }}
+                />
+                <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
+              </div>
+              {mark && (
+                <div
+                  className={styles.dtitle}
+                  style={{
+                    marginLeft: 'auto',
+                    display: 'flex',
+                    marginRight: '10px',
+                    fontSize: '16px',
+                    marginTop: '5px',
+                  }}
+                >
+                  Author: {dialogData.author}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className={`${styles.dcontent} ${styles.toImg}`} ref={dialogContent}>
+            {dialogData.messageData.list.map((value: any, index: any) => (
+              <ExportMessage
+                key={index}
+                type={value.msgType}
+                msgs={value.msg}
+                index={index}
+                currentData={totalImages}
+                dialogData={dialogData}
+                isEdit={true}
+                nikke={value.nikke}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      {openExportImg.isOpen && (
         <>
           <NikkeWindow
             title="导出图片"
-            buttonSuccess="创建"
+            buttonSuccess="导出"
             buttonCancel="取消"
-            success={() => {}}
+            success={exportRealToImg}
             cancel={cancel}
             confirm={true}
           >
-            <ExportImgContent imgData={imgData} setImgData={setImgData} preview={preview} />
+            <ExportImgContent preview={preview} {...props} />
           </NikkeWindow>
         </>
       )}

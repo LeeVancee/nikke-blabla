@@ -27,7 +27,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-div::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 0;
   /* 隐藏滚动条 */
 }

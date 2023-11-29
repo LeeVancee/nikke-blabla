@@ -72,11 +72,11 @@
   box-sizing: border-box;
 }
 
-.black::before {
+.black {
   content: '';
   display: block;
   position: absolute;
-  z-index: 9999999;
+  z-index: 99999;
   background-color: rgba(0, 0, 0, 0.65);
   width: 100vw;
   height: 100vh;
