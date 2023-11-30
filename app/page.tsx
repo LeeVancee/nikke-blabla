@@ -20,6 +20,7 @@ import Text from '@/components/text/Text';
 import Contents from '@/components/contents/Contents';
 import NikkeWindowContent from '@/components/NikkeWindowContent';
 import NikkeDialog from '@/components/NikkeDialog';
+import toast from 'react-hot-toast';
 
 const initialProject: IProjectData = { datas: [] };
 
@@ -68,12 +69,9 @@ export default function Home() {
     [project.datas]
   );
 
-  const handleTypeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSelectType(e.target.value);
-    },
-    []
-  );
+  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectType(e.target.value);
+  }, []);
 
   const buttonStyle = { width: '150px', height: '45px', margin: '5px' };
 
@@ -122,21 +120,14 @@ export default function Home() {
     setListNumber(newData.length);
   }, [currentTabId, project.datas]);
 
-  const checkData = () =>
-    proName !== '' && author !== '' && selectNikke.length !== 0;
+  const checkData = () => proName !== '' && author !== '' && selectNikke.length !== 0;
 
   const success = () => {
     if (checkData()) {
       var msgData: ChatMessageData = {
         list: [],
       };
-      const pro: Project = new Project(
-        proName,
-        proDesc,
-        author,
-        parseInt(selectType),
-        msgData
-      );
+      const pro: Project = new Project(proName, proDesc, author, parseInt(selectType), msgData);
       console.log(proDesc);
 
       selectNikke.forEach((item) => pro.projectNikkes.push(item));
@@ -169,9 +160,7 @@ export default function Home() {
       setAuthor('');
       createProject.close();
     } else {
-      console.error(
-        '创建对话失败，对话名称和作者以及对话妮姬不能小于1不能为空！'
-      );
+      toast.error('对话名称和作者以及对话妮姬不能小于1不能为空！');
     }
   };
   const cancel = () => {
@@ -211,11 +200,7 @@ export default function Home() {
         />
       )}
       <div className={styles.btnbox} style={{ height: '100%' }}>
-        <NikkeButton
-          type={buttonType.Cancel}
-          content="导出对话"
-          style={buttonStyle}
-        />
+        <NikkeButton type={buttonType.Cancel} content="导出对话" style={buttonStyle} />
         <NikkeButton
           type={buttonType.Success}
           content="创建对话"
@@ -257,18 +242,11 @@ export default function Home() {
           </NikkeWindow>
         )}
 
-        <Header
-          currentTabId={currentTabId}
-          selectTab={selectTab}
-          currentTime={currentTime}
-        />
+        <Header currentTabId={currentTabId} selectTab={selectTab} currentTime={currentTime} />
 
         <Text listNumber={listNumber} />
 
-        <Contents
-          filteredData={filteredData}
-          onCurrentProject={handleCurrentProject}
-        />
+        <Contents filteredData={filteredData} onCurrentProject={handleCurrentProject} />
       </div>
     </>
   );

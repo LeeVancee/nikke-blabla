@@ -54,7 +54,7 @@
 
 .window {
   position: absolute;
-  z-index: 9999999999;
+  z-index: 999;
   max-width: 450px;
   width: 90%;
   min-width: 380px;
@@ -76,7 +76,7 @@
   content: '';
   display: block;
   position: absolute;
-  z-index: 99999;
+  z-index: 999;
   background-color: rgba(0, 0, 0, 0.65);
   width: 100vw;
   height: 100vh;

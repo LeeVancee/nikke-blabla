@@ -194,7 +194,7 @@
 
 .back {
   position: absolute;
-  z-index: 999999;
+  z-index: 999;
   box-shadow: none;
   transform: translateY(-100vh);
   animation: slideIn 1s ease-in-out 1;

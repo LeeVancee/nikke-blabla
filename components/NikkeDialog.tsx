@@ -19,6 +19,7 @@ import { saveAs } from 'file-saver';
 import ExportMessage from '@/components/exportOnly/ExportMessage';
 
 import html2canvas from 'html2canvas';
+import toast from 'react-hot-toast';
 
 interface NikkeDialogProps {
   dialogData: any;
@@ -127,7 +128,6 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
 
       Promise.all(readerPromises)
         .then((imageDataArray) => {
-          console.log('图片数据：', imageDataArray);
           setSelectedImages(imageDataArray);
         })
         .finally(() => {
@@ -290,7 +290,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
             setCurrentExportImgState(exportImgState.pause);
           })
           .catch((error: any) => {
-            console.error('oops, something went wrong!', error);
+            toast.error('oops, something went wrong!', error);
             alert(error);
           });
       }
@@ -320,7 +320,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
           });
       }
     } else {
-      console.log('图片格式不支持');
+      toast.error('图片格式不支持');
     }
   };
   function clamp(vaule: number, min: number, max: number) {

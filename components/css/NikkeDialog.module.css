@@ -262,7 +262,6 @@ div.himg {
 div > .selectModel {
   color: rgba(22, 101, 52);
   border: 1px #2dac5c solid;
-
   background-color: rgba(134, 239, 172);
 }
 
@@ -279,7 +278,7 @@ div > .selectModel {
   border-radius: 0.25rem;
   margin: 5px;
   transition: all 0.1s ease-in-out;
-  cursor: pointer;
+  cursor: default;
 }
 
 .tilte {
@@ -355,6 +354,7 @@ div > .selectModel {
   background-color: #fda912;
   border: 1px solid #b37502;
   color: white;
+  cursor: default;
 }
 
 .newadd:hover {
@@ -365,6 +365,7 @@ div > .selectModel {
   background-color: #32b1f4;
   border: 1px solid #027fc2;
   color: white;
+  cursor: default;
 }
 
 .oldadd:hover {
@@ -439,6 +440,7 @@ div > .selectModel {
   font-weight: 900;
   text-shadow: 0px 1px 5px #00000027;
   line-height: 35px;
+  cursor: default;
 }
 .title {
   font-size: 14px;
