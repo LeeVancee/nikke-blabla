@@ -92,7 +92,7 @@ const NikkeMessage = ({
                     />
                   </span>
                 )}
-                <img src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
+                <img src="/g.png" alt="" className={styles.nikkeImg} />
               </div>
             ))}
           </div>
@@ -145,12 +145,10 @@ const NikkeMessage = ({
                 <img
                   src={currentData[parseImgToDataURL(value)]}
                   alt=""
-                  width={200}
-                  height={205}
                   className={styles.imgType}
                 />
               </span>
-              <img src="/rg.png" alt="" width={16} height={16} className={styles.znikkeImg} />
+              <img src="/rg.png" alt="" className={styles.znikkeImg} />
             </div>
           ))}
         </div>
@@ -158,9 +156,10 @@ const NikkeMessage = ({
 
       {type === msgType.img && nikke.img !== '指挥官' && (
         <div className={styles.msg}>
-          <div className={styles.head}>
-            <img src={`avatars/${nikke.img}.png`} alt="avatar" />
-          </div>
+          <div
+            className={styles.head}
+            style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}
+          ></div>
           <div className={styles.textgroup}>
             <div className={styles.name}>{nikke.name}</div>
             {msgs.map((value, index) => (
@@ -170,13 +169,11 @@ const NikkeMessage = ({
                     <img
                       src={currentData[parseImgToDataURL(value)]}
                       alt=""
-                      width={200}
-                      height={205}
                       className={styles.imgType}
                     />
                   )}
                 </span>
-                <img src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
+                <img src="/g.png" alt="" className={styles.nikkeImg} />
               </div>
             ))}
           </div>

@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Toaster
           toastOptions={{
             style: {
-              zIndex: 99999,
+              zIndex: 9999,
             },
           }}
         />

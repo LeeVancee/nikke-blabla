@@ -287,7 +287,7 @@ div > .selectModel {
 }
 
 .nikkeedit {
-  z-index: 9999999;
+  z-index: 99999;
   position: relative;
   border-top: 1px rgb(194, 194, 194) solid;
   display: flex;
@@ -409,7 +409,7 @@ div > .selectModel {
   justify-content: space-between;
   height: 100%;
   width: 100%;
-  z-index: 99999;
+  z-index: 999;
   animation: dposInOut 0.25s ease-in-out;
 }
 
@@ -498,9 +498,12 @@ div.dcontent::-webkit-scrollbar {
   background-position: center;
   background-color: #fda912;
 }
+.preview {
+  width: 100%;
+}
 
-.preview > canvas {
-  max-width: 100%;
+.preview canvas {
+  width: 100%;
 }
 
 .preview > img {

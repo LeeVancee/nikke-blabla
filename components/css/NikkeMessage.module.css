@@ -32,7 +32,7 @@
 
 .imgType {
   max-width: 200px;
-  padding: 5px 5px 0 5px;
+  padding: 8px 8px 0 8px;
   position: relative;
   border-radius: 20px;
   z-index: 999;
@@ -129,7 +129,7 @@
 .znikkeImg {
   display: block;
   position: absolute;
-  z-index: 99999999;
+  z-index: 10;
   width: 16px;
   height: 16px;
   bottom: 9px;
@@ -144,7 +144,7 @@
   position: absolute;
   width: 16px;
   height: 16px;
-  z-index: 9999999;
+  z-index: 10;
   bottom: 9px;
   left: -5px;
   transform: rotate(5deg);
