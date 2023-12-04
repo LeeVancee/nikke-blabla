@@ -14,7 +14,6 @@ interface NikkeMessageProps {
   dialogData: Project;
   isEdit: boolean;
   onDelete: (index: number) => void;
-  // setDialogData: React.Dispatch<React.SetStateAction<Project>>;
 }
 
 const NikkeMessage = ({
@@ -23,11 +22,11 @@ const NikkeMessage = ({
   type,
   index: currentIndex,
   currentData,
-  dialogData: initialData,
+  dialogData,
   isEdit,
   onDelete,
 }: NikkeMessageProps) => {
-  const [dialogData, setDialogData] = useState(initialData);
+  // const [dialogData, setDialogData] = useState(initialData);
   const [msgs, setMsgs] = useState(initialMsgs);
   //const spaceRefs = useRef([]);
   const spaceRefs = useRef<HTMLInputElement>(null);
@@ -80,7 +79,8 @@ const NikkeMessage = ({
 
       onDelete(currentIndex);
     } else {
-      msgs.splice(index, 1);
+      newMsgs.splice(index, 1);
+      setMsgs(newMsgs);
     }
     console.log('删除');
   }
@@ -95,10 +95,7 @@ const NikkeMessage = ({
     <>
       {type === msgType.nikke && (
         <div className={styles.msg}>
-          <div
-            className={styles.head}
-            style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}
-          ></div>
+          <div className={styles.head} style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}></div>
 
           <div className={styles.textgroup}>
             <div className={styles.name}>{nikke.name}</div>
@@ -121,31 +118,12 @@ const NikkeMessage = ({
                     )}
                   </span>
                 ) : (
-                  <span
-                    className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}
-                  >
-                    <Image
-                      src={currentData[parseImgToDataURL(value)]}
-                      alt=""
-                      className={styles.imgType}
-                    />
+                  <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
+                    <Image src={currentData[parseImgToDataURL(value)]} alt="" className={styles.imgType} />
                   </span>
                 )}
-                <Image
-                  src="/g.png"
-                  alt=""
-                  width={16}
-                  height={16}
-                  className={styles.nikkeImg}
-                />
-                {isEdit && (
-                  <NikkeMsgEdit
-                    add={addMsg}
-                    edit={editMsg}
-                    deleted={deleteMsg}
-                    currentIndex={index}
-                  />
-                )}
+                <Image src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
+                {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}
               </div>
             ))}
           </div>
@@ -173,9 +151,7 @@ const NikkeMessage = ({
                 </span>
               ) : (
                 <>
-                  <span
-                    className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}
-                  >
+                  <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
                     <Image
                       src={currentData[parseImgToDataURL(value)]}
                       alt=""
@@ -186,21 +162,8 @@ const NikkeMessage = ({
                   </span>
                 </>
               )}
-              <Image
-                src="/rg.png"
-                alt=""
-                width={16}
-                height={16}
-                className={styles.znikkeImg}
-              />
-              {isEdit && (
-                <NikkeMsgEdit
-                  add={addMsg}
-                  edit={editMsg}
-                  deleted={deleteMsg}
-                  currentIndex={index}
-                />
-              )}
+              <Image src="/rg.png" alt="" width={16} height={16} className={styles.znikkeImg} />
+              {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}
             </div>
           ))}
         </div>
@@ -219,21 +182,8 @@ const NikkeMessage = ({
                   className={styles.imgType}
                 />
               </span>
-              <Image
-                src="/rg.png"
-                alt=""
-                width={16}
-                height={16}
-                className={styles.znikkeImg}
-              />
-              {isEdit && (
-                <NikkeMsgEdit
-                  add={addMsg}
-                  edit={editMsg}
-                  deleted={deleteMsg}
-                  currentIndex={index}
-                />
-              )}
+              <Image src="/rg.png" alt="" width={16} height={16} className={styles.znikkeImg} />
+              {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}
             </div>
           ))}
         </div>
@@ -241,10 +191,7 @@ const NikkeMessage = ({
 
       {type === msgType.img && nikke.img !== '指挥官' && (
         <div className={styles.msg}>
-          <div
-            className={styles.head}
-            style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}
-          ></div>
+          <div className={styles.head} style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}></div>
           <div className={styles.textgroup}>
             <div className={styles.name}>{nikke.name}</div>
             {msgs.map((value, index) => (
@@ -260,21 +207,8 @@ const NikkeMessage = ({
                     />
                   )}
                 </span>
-                <Image
-                  src="/g.png"
-                  alt=""
-                  width={16}
-                  height={16}
-                  className={styles.nikkeImg}
-                />
-                {isEdit && (
-                  <NikkeMsgEdit
-                    add={addMsg}
-                    edit={editMsg}
-                    deleted={deleteMsg}
-                    currentIndex={index}
-                  />
-                )}
+                <Image src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
+                {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}
               </div>
             ))}
           </div>
@@ -282,26 +216,16 @@ const NikkeMessage = ({
       )}
 
       {type === msgType.aside && (
-        <div
-          className={`${styles.zmsg} ${styles.ntext}`}
-          style={{ color: 'rgb(59,50, 50)' }}
-        >
-          <span style={{ margin: '3px 0' }}>
-            {msgs[0] === '' ? '这里是旁白请讲' : msgs[0]}
-          </span>
+        <div className={`${styles.zmsg} ${styles.ntext}`} style={{ color: 'rgb(59,50, 50)' }}>
+          <span style={{ margin: '3px 0' }}>{msgs[0] === '' ? '这里是旁白请讲' : msgs[0]}</span>
         </div>
       )}
 
       {type === msgType.partition && (
-        <div
-          className={`${styles.zmsg} ${styles.ntext}`}
-          style={{ color: 'rgb(59,50, 50)' }}
-        >
+        <div className={`${styles.zmsg} ${styles.ntext}`} style={{ color: 'rgb(59,50, 50)' }}>
           <div className={styles.partition}>
             <div className={styles.line}></div>
-            <span className={styles.partitionContent}>
-              {msgs[0] === '' ? 'END' : msgs[0]}
-            </span>
+            <span className={styles.partitionContent}>{msgs[0] === '' ? 'END' : msgs[0]}</span>
             <div className={styles.line}></div>
           </div>
         </div>

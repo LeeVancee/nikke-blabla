@@ -1,15 +1,8 @@
 'use client';
 import styles from './css/NikkeDialog.module.css';
 import Image from 'next/image';
-import { useEffect, useRef, RefObject, useState, useCallback } from 'react';
-import {
-  ICharacterData,
-  Project,
-  enterprise,
-  msgType,
-  exportImgType,
-  ImgConfig,
-} from '../script/project';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { ICharacterData, Project, enterprise, msgType, exportImgType, ImgConfig } from '../script/project';
 import Timer from './Timer';
 import NikkeMessage from './NikkeMessage';
 import useOpenExportImg from '@/hooks/useOpenExportImg';
@@ -46,7 +39,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
   const [dialogData, setDialogData] = useState(initialData);
-  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+  const scrollContainer = useRef<HTMLDivElement | null>(null);
 
   function selectModel(type: msgType) {
     setInputPlaceholder('请输入对话内容');
@@ -95,21 +88,21 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     setIsImgListView(!isImgListView);
   };
 
-  const addImages = useCallback(() => {
-    // 将选中的图像添加到totalImages，同时检查重复, 并且当数据有更新时我们将图片添加到本地数据存储中
-
+  useEffect(() => {
+    // 將選中的圖像添加到totalImages，同時檢查重複
     let sum = 0;
     selectedImages.forEach((image) => {
       if (!totalImages.includes(image)) {
-        setTotalImages((prevTotalImages) => {
-          const newImages = [...prevTotalImages, image];
-          localStorage.setItem('totalImages', JSON.stringify(newImages));
-          return newImages;
-        });
+        setTotalImages((prevTotalImages) => [...prevTotalImages, image]);
         sum++;
       }
     });
-  }, [totalImages, selectedImages]);
+
+    // 當數據有更新時，將圖片添加到本地數據存儲中
+    if (sum > 0) {
+      localStorage.setItem('totalImages', JSON.stringify(totalImages));
+    }
+  }, [selectedImages, totalImages]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const fileInputRef = fileInput.current;
@@ -132,14 +125,9 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
         })
         .finally(() => {
           console.log('图片读取完成');
-          addImages();
         });
     }
   };
-
-  useEffect(() => {
-    addImages();
-  }, [addImages, selectedImages]);
 
   const add = useCallback(() => {
     const newInfo: ICharacterData = {
@@ -174,28 +162,27 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   }, [dialogData, currentModel, currentNikke, isOC, currentSelectImage, inputContent, saveMsg]);
 
   const append = () => {
-    // 当前模式和最后对话的模式不同 即最后对话的是img则无需进行添加
+    const lastMessage = dialogData.messageData.list[dialogData.messageData.list.length - 1];
+
     if (currentModel === msgType.img && currentSelectImage !== -1) {
-      // 如果想最加图片则必须使得msgType为追加图片
-      dialogData.messageData.list[dialogData.messageData.list.length - 1].msgType.push(
-        `[url][base64:] [${currentSelectImage}]`
-      );
-    } else if (
-      dialogData.messageData.list[dialogData.messageData.list.length - 1].msgType === msgType.img
-    ) {
-      let model: msgType = msgType.nikke;
-      // 如果最后一项是指挥官则修改为指挥官
-      if (
-        dialogData.messageData.list[dialogData.messageData.list.length - 1].nikke.img === '指挥官'
-      ) {
+      // 如果最后一项是图片则无需进行添加
+      lastMessage.msgType.push(`[url][base64:] [${currentSelectImage}]`);
+    } else if (lastMessage.msgType === msgType.img) {
+      // 如果最后一项是图片，根据追加类型修改最后一项的类型
+      let model = msgType.nikke;
+      if (lastMessage.nikke.img === '指挥官') {
         model = msgType.commander;
       }
-      // 如果最后一项是图片 且追加类型不等于图片则修改最后一项的类型
-      dialogData.messageData.list[dialogData.messageData.list.length - 1].msgType = model;
-
-      dialogData.messageData.list[dialogData.messageData.list.length - 1].msg.push(inputContent);
+      lastMessage.msgType = model;
+      lastMessage.msg.push(inputContent);
     } else {
-      dialogData.messageData.list[dialogData.messageData.list.length - 1].msg.push(inputContent);
+      // 在修改之前打印
+      console.log('Before:', dialogData.messageData.list);
+
+      lastMessage.msg.push(inputContent);
+
+      // 在修改之后打印
+      console.log('After:', dialogData.messageData.list);
 
       setInputContent('');
       saveMsg(dialogData);
@@ -207,20 +194,19 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     if (currentSelectImage !== -1) {
       return;
     }
-    if (
-      inputContent !== '' &&
-      currentModel !== msgType.aside &&
-      currentModel !== msgType.partition
-    ) {
+    if (inputContent !== '' && currentModel !== msgType.aside && currentModel !== msgType.partition) {
       setCurrentModel(msgType.nikke);
     }
   };
 
-  useEffect(() => {
-    if (scrollContainer) {
-      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+  const scrollToBottom = () => {
+    if (scrollContainer.current) {
+      scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
     }
-  }, [scrollContainer, add]);
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [add]);
   useEffect(() => {
     // 判断有没有 totalImages 这个字段
     const isV = localStorage.getItem('totalImages');
@@ -378,19 +364,13 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
           </div>
           <div className={styles.dback} onClick={() => back(dialogData)}>
             <div className={styles.dtitle}>
-              <Image
-                src="/back.png"
-                alt=" back"
-                width={25}
-                height={25}
-                style={{ marginTop: '2px' }}
-              />
+              <Image src="/back.png" alt=" back" width={25} height={25} style={{ marginTop: '2px' }} />
               <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
             </div>
           </div>
         </div>
 
-        <div className={styles.dcontent} ref={(ref) => setScrollContainer(ref)}>
+        <div className={styles.dcontent} ref={scrollContainer}>
           {dialogData.messageData.list.map((value: any, index: any) => (
             <NikkeMessage
               key={index}
@@ -410,9 +390,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
           <div className={styles.dmodel}>
             {typeList.map((value, index) => (
               <div
-                className={`${styles.dmodelView} ${
-                  currentModel === value ? styles.selectModel : ''
-                }`}
+                className={`${styles.dmodelView} ${currentModel === value ? styles.selectModel : ''}`}
                 onClick={() => selectModel(value)}
                 key={index}
               >
@@ -568,9 +546,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
           className={styles.dialogImg}
           style={{
             height: `${
-              (dialogHeader.current == null
-                ? 80
-                : clamp(dialogHeader.current.clientHeight, 70, 90)) +
+              (dialogHeader.current == null ? 80 : clamp(dialogHeader.current.clientHeight, 70, 90)) +
               (dialogContent.current == null
                 ? 50
                 : clamp(dialogContent.current.scrollHeight + imgConfig.bottomHeigth, 150, 99999999))
@@ -587,11 +563,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
             </div>
             <div className={styles.dback} onClick={() => back(dialogData)}>
               <div className={styles.dtitle}>
-                <img
-                  src="/back.png"
-                  alt=" back"
-                  style={{ marginTop: '2px', width: '25px', height: '25px' }}
-                />
+                <img src="/back.png" alt=" back" style={{ marginTop: '2px', width: '25px', height: '25px' }} />
 
                 <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
               </div>

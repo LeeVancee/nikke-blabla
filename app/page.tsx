@@ -192,31 +192,22 @@ export default function Home() {
   return (
     <>
       {filteredData && currentProject !== -1 && (
-        <NikkeDialog
-          dialogData={filteredData[currentProject]}
-          back={back}
-          saveMsg={handleSaveMsg}
-          currentTime={currentTime}
-        />
+        <div style={{ height: '100%' }}>
+          <NikkeDialog
+            dialogData={filteredData[currentProject]}
+            back={back}
+            saveMsg={handleSaveMsg}
+            currentTime={currentTime}
+          />
+        </div>
       )}
       <div className={styles.btnbox} style={{ height: '100%' }}>
         <NikkeButton type={buttonType.Cancel} content="导出对话" style={buttonStyle} />
-        <NikkeButton
-          type={buttonType.Success}
-          content="创建对话"
-          onClick={createProject.open}
-          style={buttonStyle}
-        />
+        <NikkeButton type={buttonType.Success} content="创建对话" onClick={createProject.open} style={buttonStyle} />
       </div>
       <div className={styles.box}>
         <div className={`${styles.box} ${styles.back}`}>
-          <Image
-            src={`/background.png`}
-            alt="background"
-            fill
-            style={{ objectFit: 'cover' }}
-            priority
-          />
+          <Image src={`/background.png`} alt="background" fill style={{ objectFit: 'cover' }} priority />
         </div>
         {createProject.isOpen && (
           <NikkeWindow

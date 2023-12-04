@@ -20,18 +20,7 @@ interface NikkeWindowContentProps {
   select: (value: any, index: number) => void;
 }
 
-const enterprises = [
-  'All',
-  '极乐净土',
-  '米西里斯',
-  '泰特拉',
-  '朝圣者',
-  '反常',
-  '配角',
-  '主角',
-  '动物',
-  '莱彻',
-];
+const enterprises = ['All', '极乐净土', '米西里斯', '泰特拉', '朝圣者', '反常', '配角', '主角', '动物', '莱彻'];
 
 const NikkeWindowContent = ({
   proName,
@@ -55,9 +44,7 @@ const NikkeWindowContent = ({
   useEffect(() => {
     // 按企业筛选妮姬  企业为枚举类型  0 为全部  1 为极乐净土  2 为米西里斯  3 为泰特拉  4 为朝圣者  5 为反常
     if (selectedEnterprise !== 0) {
-      const newFilteredNikkes = nikkeData.nikkes.filter(
-        (nikke) => nikke.enterprise === selectedEnterprise
-      );
+      const newFilteredNikkes = nikkeData.nikkes.filter((nikke) => nikke.enterprise === selectedEnterprise);
 
       setFilteredNikkes(newFilteredNikkes);
     } else {
@@ -89,13 +76,7 @@ const NikkeWindowContent = ({
               }}
             >
               <div>
-                <input
-                  id="task"
-                  type="radio"
-                  value="0"
-                  name="projectType"
-                  onChange={handleTypeChange}
-                />
+                <input id="task" type="radio" value="0" name="projectType" onChange={handleTypeChange} />
                 <label htmlFor="task">任务</label>
               </div>
               <div>
@@ -110,13 +91,7 @@ const NikkeWindowContent = ({
                 <label htmlFor="nikke">妮姬</label>
               </div>
               <div>
-                <input
-                  id="group"
-                  type="radio"
-                  value="2"
-                  name="projectType"
-                  onChange={handleTypeChange}
-                />
+                <input id="group" type="radio" value="2" name="projectType" onChange={handleTypeChange} />
                 <label htmlFor="group">群组</label>
               </div>
             </div>
@@ -152,9 +127,7 @@ const NikkeWindowContent = ({
             <div className={styles.enterprise}>
               {enterprises.map((value, index) => (
                 <div
-                  className={`${styles.enterpriseBox} ${
-                    selectedEnterprise === index ? styles.selectedEnterprise : ''
-                  }`}
+                  className={`${styles.enterpriseBox} ${selectedEnterprise === index ? styles.selectedEnterprise : ''}`}
                   key={index}
                   onClick={() => selectEnterprise(index)}
                 >
