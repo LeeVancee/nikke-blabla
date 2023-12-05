@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+'use client';
+import { useState } from 'react';
 import { INikkeData, nikkeData, buttonType } from '../script/project';
-//import styles from './css/NikkeSelect.module.css';
-import styles from '@/app/page.module.css';
+import styles from './css/NikkeSelect.module.css';
+//import styles from '@/app/page.module.css';
 import NikkeButton from './NikkeButton';
 import Image from 'next/image';
 
@@ -14,8 +15,7 @@ const NikkeSelect = ({ filteredData, onFilteredData }: NikkeSelectProps) => {
   const [selectNikke, setSelectNikke] = useState<Array<INikkeData>>([]);
   const [isSelect, setIsSelect] = useState<Array<boolean>>([]);
   const [parentData, setParentData] = useState(filteredData);
-  // const [filteredNikkes, setFilteredNikkes] = useState<INikkeData[]>([]);
-  // const parentData = filteredData;
+
   const select = (value: any, index: any) => {
     // 如果数组中有这个元素则代表当前nikke是被选择的，所以要删除元素反之则添加元素
     if (!selectNikke.includes(value)) {

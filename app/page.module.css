@@ -1,3 +1,7 @@
+.container {
+  position: relative;
+  padding: 0;
+}
 .updateText {
   font-size: 15px;
   text-indent: 2em;
@@ -227,8 +231,7 @@
     0.1px 0.1px 12.7px rgba(0, 0, 0, 0.034), 0.2px 0.2px 17.4px rgba(0, 0, 0, 0.04),
     0.3px 0.3px 23.1px rgba(0, 0, 0, 0.046), 0.4px 0.4px 31.1px rgba(0, 0, 0, 0.052),
     0.7px 0.7px 46.3px rgba(0, 0, 0, 0.061), 1px 1px 94px rgba(0, 0, 0, 0.08);
-  background: linear-gradient(transparent 50%, #fda912 50%),
-    linear-gradient(90deg, transparent 50%, #f8be53bb 50%);
+  background: linear-gradient(transparent 50%, #fda912 50%), linear-gradient(90deg, transparent 50%, #f8be53bb 50%);
 
   background-size: 5px 5px;
   background-position: center;
@@ -312,4 +315,22 @@
     margin: 0 auto;
     background-color: #f1f1f1;
   }
+}
+
+.dialogDelete {
+  position: absolute;
+  background: url('/icon/delete.svg') center no-repeat;
+  right: 10px;
+  top: 35px;
+  width: 25px;
+  height: 25px;
+}
+.dialogExport {
+  position: absolute;
+  background: url('/icon/export.svg') center no-repeat;
+  background-size: 25px;
+  right: 40px;
+  top: 35px;
+  width: 25px;
+  height: 25px;
 }

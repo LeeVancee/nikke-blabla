@@ -25,6 +25,7 @@ import NikkeWindowContent from '@/components/NikkeWindowContent';
 import NikkeDialog from '@/components/NikkeDialog';
 import toast from 'react-hot-toast';
 import { openDB } from '@/data/useIndexedDB';
+import saveAs from 'file-saver';
 const initialProject: IProjectData = { datas: [] };
 
 export default function Home() {
@@ -163,10 +164,11 @@ export default function Home() {
         };
 
         // 更新數據到 indexDB
-        let str = JSON.stringify(updatedProject);
+        /* let str = JSON.stringify(updatedProject);
         console.log('更新对象项目到indexDB中');
         let data = { sequenceId: 1, projects: str };
-        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data); */
+        handleSaveMsg(pro);
 
         return updatedProject;
       });
@@ -211,6 +213,36 @@ export default function Home() {
     setCurrentProject(index);
   };
 
+  function updateData() {
+    let str = JSON.stringify(project);
+    console.log('更新对象项目到indexDB中');
+    let data: Database = { sequenceId: 1, projects: str };
+    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+  }
+
+  function deleteDialog(index: number) {
+    const updatedDatas = [...project.datas];
+    updatedDatas.splice(index, 1);
+    const updatedProject = { ...project, datas: updatedDatas };
+    setProject(updatedProject);
+
+    let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
+    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+  }
+  function dialogExport(index: number) {
+    let currentData = project.datas[index];
+    downloadJson(currentData, 'data.json');
+  }
+
+  function downloadJson(data: any, filename: string) {
+    const jsonData = JSON.stringify(data);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    saveAs(blob, filename || 'data.json');
+  }
+  function jump(url: string) {
+    location.href = url;
+  }
+
   return (
     <>
       {filteredData && currentProject !== -1 && (
@@ -234,7 +266,7 @@ export default function Home() {
         {createProject.isOpen && (
           <NikkeWindow
             title="Nikke blabla"
-            confirm={false}
+            confirm={true}
             buttonSuccess="创建"
             buttonCancel="取消"
             success={success}
@@ -259,7 +291,12 @@ export default function Home() {
 
         <Text listNumber={listNumber} />
 
-        <Contents filteredData={filteredData} onCurrentProject={handleCurrentProject} />
+        <Contents
+          filteredData={filteredData}
+          onCurrentProject={handleCurrentProject}
+          deleteDialog={deleteDialog}
+          dialogExport={dialogExport}
+        />
       </div>
     </>
   );

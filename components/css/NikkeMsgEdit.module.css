@@ -31,25 +31,27 @@
   border-radius: 15px;
 }
 
-.bounce-enter-from,
-.bounce-leave-to {
+.bounce-enter {
   opacity: 0;
-}
-
-.bounce-enter-active,
-.bounce-leave-active {
-  transition: opacity 0.5s ease;
+  transform: scale(0.9);
 }
 
 .bounce-enter-active {
-  animation: bounce 0.4s ease;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.bounce-exit- {
+  opacity: 1;
 }
 
-.bounce-leave-active {
-  animation: bounce 0.5s ease reverse;
+.bounce-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
 }
 
-@keyframes bounce {
+/* @keyframes bounce {
   0% {
     transform: scale(0);
     transform: translateY(-20px);
@@ -64,7 +66,7 @@
     transform: translateY(0px);
     transform: scale(1);
   }
-}
+} */
 
 .editTab > div {
   margin: 0 1px;
