@@ -50,12 +50,10 @@
   animation: spinner 1500ms infinite linear;
   border-radius: 0.5em;
   -webkit-box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0,
-    rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0,
-    rgba(0, 0, 0, 0.5) -1.5em 0 0 0, rgba(0, 0, 0, 0.5) -1.1em -1.1em 0 0,
-    rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
-  box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0,
-    rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0,
-    rgba(0, 0, 0, 0.75) -1.5em 0 0 0, rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0,
+    rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.5) -1.5em 0 0 0,
+    rgba(0, 0, 0, 0.5) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+  box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0,
+    rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0, rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0,
     rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
 }
 
@@ -157,6 +155,7 @@
 .imgList {
   height: 230px;
   max-height: 230px;
+  min-height: 230px;
   overflow-y: scroll;
   background-color: #fcfcfc;
   border-top: 1px solid #f1f1f1;
@@ -317,6 +316,37 @@ div > .selectModel {
   line-height: 32px;
   text-align: center;
   background-color: #fda912 !important;
+}
+
+.nadd {
+  box-sizing: border-box;
+  border: #027fc2 1px dashed;
+  background-image: url('/icon/addNikke.svg');
+  background-position: center;
+  background-size: 24px !important;
+}
+
+/* .selectNikkeInfo::after {
+    content: "";
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    background-image: url("/icon/delete.svg");
+    background-size: 32px;
+    opacity: .9;
+} */
+
+.selectNikkeInfo {
+  display: inline-block;
+  margin: 9px 9px;
+  width: 32px;
+  height: 32px;
+  background-color: rgb(212, 212, 212);
+  border-radius: 16px;
+  background-repeat: no-repeat;
+  background-size: 32px;
+  border-radius: 32px;
+  transition: transform 0.06s ease-in-out;
 }
 
 .selectNikkeInfo {
@@ -492,8 +522,7 @@ div.dcontent::-webkit-scrollbar {
   height: 12%;
   min-height: 110px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-  background: linear-gradient(transparent 50%, #fda912 50%),
-    linear-gradient(90deg, transparent 50%, #f8be53bb 50%);
+  background: linear-gradient(transparent 50%, #fda912 50%), linear-gradient(90deg, transparent 50%, #f8be53bb 50%);
   background-size: 5px 5px;
   background-position: center;
   background-color: #fda912;
@@ -508,4 +537,26 @@ div.dcontent::-webkit-scrollbar {
 
 .preview > img {
   width: 100%;
+}
+
+.itab {
+  display: flex;
+  height: 35px;
+  align-items: center;
+}
+.itab > li {
+  height: 35px;
+  min-width: 80px;
+  padding: 0 5px;
+  color: rgb(80, 80, 80);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.selectType {
+  color: rgb(243, 124, 124) !important;
+  background-color: rgb(222, 224, 222);
+}
+.imageType {
+  height: 35px;
 }

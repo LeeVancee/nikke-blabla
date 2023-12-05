@@ -10,18 +10,21 @@ import {
   nikkeData,
   INikkeData,
   ChatMessageData,
+  NikkeDatabase,
+  Database,
+  addDataToDB,
+  retrieveDataFromDB,
 } from '@/script/project';
 import NikkeButton from '@/components/NikkeButton';
 import useCreateProject from '@/hooks/useCreateProject';
 import NikkeWindow from '@/components/NikkeWindow';
-
 import Header from '@/components/header/Header';
 import Text from '@/components/text/Text';
 import Contents from '@/components/contents/Contents';
 import NikkeWindowContent from '@/components/NikkeWindowContent';
 import NikkeDialog from '@/components/NikkeDialog';
 import toast from 'react-hot-toast';
-
+import { openDB } from '@/data/useIndexedDB';
 const initialProject: IProjectData = { datas: [] };
 
 export default function Home() {
@@ -100,19 +103,38 @@ export default function Home() {
     });
   }
 
-  useEffect(() => {
-    // 从本地存储中获取项目数据
+  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
+
+  const initProject = () => {
+    retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData).then((value) => {
+      if (value) {
+        const parsedProject = JSON.parse(value.projects);
+        console.log('已经有数据了！', parsedProject);
+        setProject(parsedProject);
+        selectTab(1);
+      } else {
+        console.log('没有数据，数据写入中……');
+        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
+      }
+    });
+
+    /* // 从本地存储中获取项目数据
     const storedProjects = localStorage.getItem('projects');
 
     if (storedProjects === null) {
       // 如果本地存储中没有项目数据，则将初始数据存储到本地存储中
-      localStorage.setItem('projects', JSON.stringify(initialProject));
+      // localStorage.setItem('projects', JSON.stringify(initialProject));
     } else {
       // 如果本地存储中有项目数据，则使用它来更新项目状态
-      setProject(JSON.parse(storedProjects));
-    }
-  }, []);
+      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
+       localStorage.setItem('cData', storedProjects);
+      localStorage.removeItem('projects');
+    } */
+  };
 
+  useEffect(() => {
+    initProject();
+  }, []);
   useEffect(() => {
     // 过滤数据
     const newData = project.datas.filter((item) => item.type === currentTabId);
@@ -140,11 +162,11 @@ export default function Home() {
           datas: [...prevProject.datas, pro],
         };
 
-        // 更新完数据后，再打印
-        console.log('new Pro', updatedProject);
-
-        // 更新 localStorage
-        localStorage.setItem('projects', JSON.stringify(updatedProject));
+        // 更新數據到 indexDB
+        let str = JSON.stringify(updatedProject);
+        console.log('更新对象项目到indexDB中');
+        let data = { sequenceId: 1, projects: str };
+        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
 
         return updatedProject;
       });
@@ -180,9 +202,9 @@ export default function Home() {
   // 保存对话函数
   const handleSaveMsg = (pro: Project) => {
     project.datas[currentProject] = pro;
-    localStorage.setItem('projects', JSON.stringify(project));
-
-    console.log('保存成功');
+    // localStorage.setItem('projects', JSON.stringify(project));
+    let data: Database = { sequenceId: 1, projects: JSON.stringify(project) };
+    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
   };
 
   const handleCurrentProject = (index: number) => {
@@ -212,7 +234,7 @@ export default function Home() {
         {createProject.isOpen && (
           <NikkeWindow
             title="Nikke blabla"
-            confirm={true}
+            confirm={false}
             buttonSuccess="创建"
             buttonCancel="取消"
             success={success}

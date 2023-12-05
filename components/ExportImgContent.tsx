@@ -16,6 +16,8 @@ const ExportImgContent = ({
   handleScale,
   handleExportType,
   handleQuality,
+  currentExportImgState,
+  exportImgState,
 }: any) => {
   return (
     <div className={styles.project}>
@@ -40,24 +42,11 @@ const ExportImgContent = ({
               }}
             >
               <div>
-                <input
-                  id="png"
-                  type="radio"
-                  value="0"
-                  name="projectType"
-                  onChange={handleExportType}
-                  defaultChecked
-                />
+                <input id="png" type="radio" value="0" name="projectType" onChange={handleExportType} defaultChecked />
                 <label htmlFor="png">PNG</label>
               </div>
               <div>
-                <input
-                  id="jpeg"
-                  type="radio"
-                  value="1"
-                  name="projectType"
-                  onChange={handleExportType}
-                />
+                <input id="jpeg" type="radio" value="1" name="projectType" onChange={handleExportType} />
                 <label htmlFor="jpeg">JPEG</label>
               </div>
             </div>
@@ -66,20 +55,11 @@ const ExportImgContent = ({
         {parseInt(exportType) === exportImgType.jpeg && (
           <div className={styles.pcontent}>
             <span>图片质量</span>
-            <input
-              className="nikkeInput"
-              value={quality}
-              onChange={handleQuality}
-              min={0}
-              max={1}
-              type="number"
-            />
+            <input className="nikkeInput" value={quality} onChange={handleQuality} min={0} max={1} type="number" />
             <div></div>
           </div>
         )}
-        {parseInt(exportType) === exportImgType.jpeg && (
-          <NikkeInfo> jepg导出时的质量取值范围{0 - 1}</NikkeInfo>
-        )}
+        {parseInt(exportType) === exportImgType.jpeg && <NikkeInfo> jepg导出时的质量取值范围{0 - 1}</NikkeInfo>}
         <div className={styles.pcontent}>
           <span>缩放</span>
           <input
@@ -97,7 +77,9 @@ const ExportImgContent = ({
         <div style={{ height: '1px', backgroundColor: '#e6e7e6' }}></div>
         <div style={{ textAlign: 'center' }}>预览</div>
         <NikkeInfo> 图片预览，如果无法在你的浏览器导出则保存预览图 </NikkeInfo>
-        <div ref={preview} className={dialogStyles.preview}></div>
+        <div ref={preview} className={dialogStyles.preview}>
+          {currentExportImgState === exportImgState.run && <div className={styles.loading}>Loading&#8230;</div>}
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,22 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import styles from './css/NikkeDialog.module.css';
 import Image from 'next/image';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { ICharacterData, Project, enterprise, msgType, exportImgType, ImgConfig } from '../script/project';
+import {
+  ICharacterData,
+  Project,
+  enterprise,
+  msgType,
+  exportImgType,
+  ImgConfig,
+  retrieveDataFromDB,
+  NikkeDatabase,
+  addDataToDB,
+  ImgType,
+  builtinImageDatas,
+} from '../script/project';
+import { openDB } from '../data/useIndexedDB';
 import Timer from './Timer';
 import NikkeMessage from './NikkeMessage';
 import useOpenExportImg from '@/hooks/useOpenExportImg';
@@ -10,9 +24,10 @@ import NikkeWindow from './NikkeWindow';
 import ExportImgContent from './ExportImgContent';
 import { saveAs } from 'file-saver';
 import ExportMessage from '@/components/exportOnly/ExportMessage';
-
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
+import NikkeSelect from './NikkeSelect';
+import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
 
 interface NikkeDialogProps {
   dialogData: any;
@@ -40,6 +55,9 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   const inputRef = useRef(null);
   const [dialogData, setDialogData] = useState(initialData);
   const scrollContainer = useRef<HTMLDivElement | null>(null);
+  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
+  const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
+  const addNikkeWindow = useAddNikkeWindow();
 
   function selectModel(type: msgType) {
     setInputPlaceholder('请输入对话内容');
@@ -88,47 +106,6 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     setIsImgListView(!isImgListView);
   };
 
-  useEffect(() => {
-    // 將選中的圖像添加到totalImages，同時檢查重複
-    let sum = 0;
-    selectedImages.forEach((image) => {
-      if (!totalImages.includes(image)) {
-        setTotalImages((prevTotalImages) => [...prevTotalImages, image]);
-        sum++;
-      }
-    });
-
-    // 當數據有更新時，將圖片添加到本地數據存儲中
-    if (sum > 0) {
-      localStorage.setItem('totalImages', JSON.stringify(totalImages));
-    }
-  }, [selectedImages, totalImages]);
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const fileInputRef = fileInput.current;
-    const files = Array.from(fileInputRef?.files || []);
-
-    if (files.length > 0) {
-      const readerPromises = files.map((file) => {
-        return new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            resolve(reader.result as string);
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-
-      Promise.all(readerPromises)
-        .then((imageDataArray) => {
-          setSelectedImages(imageDataArray);
-        })
-        .finally(() => {
-          console.log('图片读取完成');
-        });
-    }
-  };
-
   const add = useCallback(() => {
     const newInfo: ICharacterData = {
       msgType: currentModel, //正常消息类型
@@ -148,8 +125,13 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     if (currentModel === msgType.img && currentSelectImage !== -1) {
       newInfo.msgType = msgType.img;
       console.log(currentSelectImage);
-
-      newInfo.msg.push(`[url][base64:] [${currentSelectImage}]`);
+      if (currentImageType === ImgType.localImage) {
+        newInfo.msg.push(`[url][base64:] [${totalImages[currentSelectImage]}]`);
+      } else if (currentImageType === ImgType.builtinImage) {
+        newInfo.msg.push(`[url][base64:] [${builtinImageDatas[currentSelectImage]}]`);
+      } else {
+        newInfo.msg.push('[表情]');
+      }
     } else {
       newInfo.msg.push(inputContent);
     }
@@ -159,14 +141,34 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
 
     setInputContent('');
     saveMsg(dialogData);
-  }, [dialogData, currentModel, currentNikke, isOC, currentSelectImage, inputContent, saveMsg]);
+  }, [
+    dialogData,
+    currentModel,
+    currentNikke,
+    isOC,
+    currentSelectImage,
+    inputContent,
+    saveMsg,
+    totalImages,
+    currentImageType,
+  ]);
 
   const append = () => {
-    const lastMessage = dialogData.messageData.list[dialogData.messageData.list.length - 1];
+    // const lastMessage = dialogData.messageData.list[dialogData.messageData.list.length - 1];
+    const updatedList = [...dialogData.messageData.list];
+
+    const lastMessage = updatedList[updatedList.length - 1];
 
     if (currentModel === msgType.img && currentSelectImage !== -1) {
       // 如果最后一项是图片则无需进行添加
-      lastMessage.msgType.push(`[url][base64:] [${currentSelectImage}]`);
+
+      if (currentImageType === ImgType.localImage) {
+        lastMessage.msg.push(`[url][base64:] [${totalImages[currentSelectImage]}]`);
+      } else if (currentImageType === ImgType.builtinImage) {
+        lastMessage.msg.push(`[url][base64:] [${builtinImageDatas[currentSelectImage]}]`);
+      } else {
+        lastMessage.msg.push('差分');
+      }
     } else if (lastMessage.msgType === msgType.img) {
       // 如果最后一项是图片，根据追加类型修改最后一项的类型
       let model = msgType.nikke;
@@ -177,16 +179,15 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
       lastMessage.msg.push(inputContent);
     } else {
       // 在修改之前打印
-      console.log('Before:', dialogData.messageData.list);
 
       lastMessage.msg.push(inputContent);
-
       // 在修改之后打印
-      console.log('After:', dialogData.messageData.list);
 
       setInputContent('');
-      saveMsg(dialogData);
     }
+    setDialogData({ ...dialogData, messageData: { ...dialogData.messageData, list: updatedList } });
+
+    saveMsg(dialogData);
   };
 
   const check = () => {
@@ -207,15 +208,74 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   useEffect(() => {
     scrollToBottom();
   }, [add]);
-  useEffect(() => {
-    // 判断有没有 totalImages 这个字段
-    const isV = localStorage.getItem('totalImages');
-    if (isV === null) {
-      localStorage.setItem('totalImages', JSON.stringify(totalImages));
-    } else {
-      setTotalImages(JSON.parse(isV));
+
+  const addImages = () => {
+    // 将选中的图像添加到totalImages，同时检查重复，并且当数据有更新时我们将图片添加到本地数据存储中
+    let sum = 0;
+    selectedImages.forEach((image) => {
+      if (!totalImages.includes(image)) {
+        totalImages.push(image);
+        sum++;
+        console.log('success');
+      }
+    });
+
+    if (sum > 0) {
+      let data = { sequenceId: NikkeDatabase.nikkeTotalImages, totalImages: JSON.stringify(totalImages) };
+      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
     }
-  }, []);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileInput = event.target;
+    const files = Array.from(fileInput.files || []);
+
+    if (files.length > 0) {
+      const readerPromises = files.map((file) => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve(reader.result);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(readerPromises)
+        .then((imageDataArray: any) => {
+          /*  const newImage = selectedImages.concat(imageDataArray);
+
+          setSelectedImages(newImage); */
+          selectedImages.push(imageDataArray);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          addImages();
+        });
+    }
+  };
+
+  const initialImages = () => {
+    retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
+      if (value) {
+        //  totalImages = JSON.parse(value.totalImages);
+        setTotalImages(JSON.parse(value.totalImages));
+      } else {
+        console.log('没有图片数据，数据写入中……');
+        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, {
+          sequenceId: NikkeDatabase.nikkeTotalImages,
+          totalImages: JSON.stringify(totalImages),
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    // 在组件挂载时，从数据库中获取图片数据
+    initialImages();
+  }, [handleFileUpload]);
 
   function handleDelete(index: any) {
     const newDialogData = { ...dialogData };
@@ -239,7 +299,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   const [exportType, setExportType] = useState('0');
   const [imgName, setImgName] = useState(dialogData.name);
   const [mark, setMark] = useState(true);
-
+  const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
   const [currentExportImgState, setCurrentExportImgState] = useState(exportImgState.pause);
   const preview = useRef<HTMLDivElement | null>(null);
   const dialogImg = useRef<HTMLDivElement | null>(null);
@@ -250,6 +310,10 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     maxWidth: 550,
     bottomHeigth: 15,
   });
+
+  const handleFilteredData = (newFilteredData: any) => {
+    setFilteredData(newFilteredData);
+  };
 
   const exportRealToImg = () => {
     if (exportType === exportImgType.png.toString()) {
@@ -337,6 +401,11 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   const handleMark = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMark(e.target.checked);
   };
+
+  const selectType = (index: number) => {
+    setCurrentImageType(index);
+    console.log(index);
+  };
   const props = {
     mark,
     imgName,
@@ -348,10 +417,28 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     handleQuality,
     handleScale,
     handleMark,
+    currentExportImgState,
+    exportImgState,
   };
 
   return (
     <>
+      <div style={{ width: '100%', height: '75%', position: 'absolute' }}>
+        {addNikkeWindow.isOpen && (
+          <NikkeWindow
+            title="添加新的妮姬对象"
+            confirm={false}
+            buttonCancel="取消"
+            buttonSuccess="添加"
+            cancel={addNikkeWindow.close}
+          >
+            <div>
+              <NikkeSelect filteredData={dialogData?.projectNikkes} onFilteredData={handleFilteredData} />
+            </div>
+          </NikkeWindow>
+        )}
+      </div>
+
       <div className={styles.dialog}>
         <div className={styles.dheader}>
           <div className={styles.title}>
@@ -382,6 +469,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
               isEdit={true}
               nikke={value.nikke}
               onDelete={handleDelete}
+              saveMsg={saveMsg}
             />
           ))}
         </div>
@@ -412,7 +500,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
                 指
               </div>
               <div className={styles.dselectnikke}>
-                {dialogData?.projectNikkes.map((value: any, index: number) => (
+                {filteredData.map((value: any, index: number) => (
                   <div
                     className={styles.selectNikkeInfo}
                     style={{
@@ -422,6 +510,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
                     onClick={() => selectNikke(index)}
                   ></div>
                 ))}
+                <div className={`${styles.selectNikkeInfo} ${styles.nadd}`} onClick={addNikkeWindow.open}></div>
               </div>
             </>
           )}
@@ -430,46 +519,106 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
         )} */}
 
           {isImgListView && (
-            <div className={styles.imgList}>
-              {totalImages.map((value, index) => (
-                <div key={index}>
-                  <div style={{ width: '96px', height: '96px' }}>
-                    <Image
-                      src={value}
-                      width={96}
-                      height={96}
-                      alt=""
-                      className={currentSelectImage === index ? styles.isSelectImageView : ''}
-                      style={{
-                        boxSizing: 'border-box',
-                        backgroundColor: '#c6c6c6',
-                        borderRadius: '5px',
-                        border: '2px solid #c6c6c6',
-                        transition: 'border 0.1s ease-in-out',
-                      }}
-                      onClick={() => selectImage(index)}
-                    />
+            <div style={{ backgroundColor: '#fcfcfc' }}>
+              <div className={styles.imageType}>
+                <ul style={{ color: 'black' }} className={styles.itab}>
+                  <li
+                    onClick={() => selectType(0)}
+                    className={currentImageType === ImgType.localImage ? styles.selectType : ''}
+                  >
+                    <span>本地图片</span>
+                  </li>
+                  <li
+                    onClick={() => selectType(1)}
+                    className={currentImageType === ImgType.builtinImage ? styles.selectType : ''}
+                  >
+                    <span>内置图片</span>
+                  </li>
+                  <li
+                    onClick={() => selectType(2)}
+                    className={currentImageType === ImgType.difference ? styles.selectType : ''}
+                  >
+                    <span>表情差分</span>
+                  </li>
+                </ul>
+              </div>
+
+              {currentImageType === ImgType.localImage && (
+                <div className={styles.imgList}>
+                  {totalImages.map((value, index) => (
+                    <div key={index}>
+                      <div style={{ width: '96px', height: '96px' }}>
+                        <img
+                          src={value}
+                          width={96}
+                          height={96}
+                          alt=""
+                          className={currentSelectImage === index ? styles.isSelectImageView : ''}
+                          style={{
+                            boxSizing: 'border-box',
+                            backgroundColor: '#c6c6c6',
+                            borderRadius: '5px',
+                            border: '2px solid #c6c6c6',
+                            transition: 'border 0.1s ease-in-out',
+                          }}
+                          onClick={() => selectImage(index)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <div
+                    style={{
+                      fontSize: '64px',
+                      color: 'black',
+                      width: '96px',
+                      height: '96px',
+                      textAlign: 'center',
+                      border: '1px solid skyblue',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    onClick={openFile}
+                  >
+                    <span style={{ marginTop: '-11px' }}> + </span>
                   </div>
                 </div>
-              ))}
+              )}
 
-              <div
-                style={{
-                  fontSize: '64px',
-                  color: 'black',
-                  width: '96px',
-                  height: '96px',
-                  textAlign: 'center',
-                  border: '1px solid skyblue',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-                onClick={openFile}
-              >
-                <span style={{ marginTop: '-11px' }}> + </span>
-              </div>
+              {currentImageType === ImgType.builtinImage && (
+                <div className={styles.imgList}>
+                  {builtinImageDatas.map((value, index) => (
+                    <div key={index} style={{ width: '96px' }}>
+                      <img
+                        src={value}
+                        width={96}
+                        height={96}
+                        alt=""
+                        property=""
+                        className={currentSelectImage === index ? styles.isSelectImageView : ''}
+                        style={{
+                          boxSizing: 'border-box',
+                          backgroundColor: '#c6c6c6',
+                          borderRadius: '5px',
+                          border: '2px solid #c6c6c6',
+                          transition: 'border 0.1s ease-in-out',
+                        }}
+                        onClick={() => selectImage(index)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {currentImageType === ImgType.difference && (
+                <div className={styles.imgList}>
+                  {builtinImageDatas.map((value, index) => (
+                    <div key={index}>{value}</div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -495,9 +644,11 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
                 </span>
               )}
             </div>
-            <div className={styles.upload} onClick={openFileInput}>
-              <Image src="/image.png" alt="" width={32} height={32} />
-            </div>
+            {currentModel === msgType.img && (
+              <div className={styles.upload} onClick={openFileInput}>
+                <Image src="/image.png" alt="" width={32} height={32} />
+              </div>
+            )}
             <input
               id="fileInput"
               type="file"
@@ -609,7 +760,13 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
             cancel={cancel}
             confirm={true}
           >
-            <ExportImgContent preview={preview} {...props} />
+            <ExportImgContent
+              preview={preview}
+              {...props}
+              dialogData={dialogData}
+              currrentTime={currentTime}
+              totalImages={totalImages}
+            />
           </NikkeWindow>
         </>
       )}

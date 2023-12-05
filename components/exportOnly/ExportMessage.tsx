@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import { INikkeData, Project, msgType } from '@/script/project';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import styles from '../css/NikkeMessage.module.css';
-import Image from 'next/image';
 
 interface NikkeMessageProps {
   msgs: Array<string>;
@@ -14,13 +14,7 @@ interface NikkeMessageProps {
   isEdit: boolean;
 }
 
-const NikkeMessage = ({
-  msgs: initialMsgs,
-  nikke,
-  type,
-  currentData,
-  dialogData: initialData,
-}: NikkeMessageProps) => {
+const NikkeMessage = ({ msgs: initialMsgs, nikke, type, currentData, dialogData: initialData }: NikkeMessageProps) => {
   const [dialogData, setDialogData] = useState(initialData);
   const [msgs, setMsgs] = useState(initialMsgs);
   const spaceRefs = useRef<HTMLInputElement>(null);
@@ -49,19 +43,21 @@ const NikkeMessage = ({
   };
 
   const parseImgToDataURL = (content: string) => {
-    let value = content.split(' ');
-    let index: string = value[1].substring(1, value[1].length - 1);
-    return parseInt(index);
+    const matches = content.match(/\[url\]\[base64:\]\s*\[([^\]]+)\]/);
+
+    if (matches && matches[1]) {
+      const index = matches[1];
+      return index;
+    }
+
+    return ''; // 如果没有匹配到索引，返回 字符串
   };
 
   return (
     <>
       {type === msgType.nikke && (
         <div className={styles.msg}>
-          <div
-            className={styles.head}
-            style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}
-          ></div>
+          <div className={styles.head} style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}></div>
 
           <div className={styles.textgroup}>
             <div className={styles.name}>{nikke.name}</div>
@@ -85,11 +81,7 @@ const NikkeMessage = ({
                   </span>
                 ) : (
                   <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                    <img
-                      src={currentData[parseImgToDataURL(value)]}
-                      alt=""
-                      className={styles.imgType}
-                    />
+                    <img src={parseImgToDataURL(value)} alt="" className={styles.imgType} />
                   </span>
                 )}
                 <img src="/g.png" alt="" className={styles.nikkeImg} />
@@ -121,13 +113,7 @@ const NikkeMessage = ({
               ) : (
                 <>
                   <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                    <img
-                      src={currentData[parseImgToDataURL(value)]}
-                      alt=""
-                      width={30}
-                      height={30}
-                      className={styles.imgType}
-                    />
+                    <img src={parseImgToDataURL(value)} alt="" width={30} height={30} className={styles.imgType} />
                   </span>
                 </>
               )}
@@ -142,11 +128,7 @@ const NikkeMessage = ({
           {msgs.map((value, index) => (
             <div className={styles.ztextbox} key={index}>
               <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                <img
-                  src={currentData[parseImgToDataURL(value)]}
-                  alt=""
-                  className={styles.imgType}
-                />
+                <img src={parseImgToDataURL(value)} alt="" className={styles.imgType} />
               </span>
               <img src="/rg.png" alt="" className={styles.znikkeImg} />
             </div>
@@ -156,22 +138,13 @@ const NikkeMessage = ({
 
       {type === msgType.img && nikke.img !== '指挥官' && (
         <div className={styles.msg}>
-          <div
-            className={styles.head}
-            style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}
-          ></div>
+          <div className={styles.head} style={{ backgroundImage: `url(avatars/${nikke.img}.png)` }}></div>
           <div className={styles.textgroup}>
             <div className={styles.name}>{nikke.name}</div>
             {msgs.map((value, index) => (
               <div className={styles.textbox} key={index}>
                 <span className={`${styles.text}  ${styles.toimg}`}>
-                  {currentData[parseImgToDataURL(value)] && (
-                    <img
-                      src={currentData[parseImgToDataURL(value)]}
-                      alt=""
-                      className={styles.imgType}
-                    />
-                  )}
+                  {parseImgToDataURL(value) && <img src={parseImgToDataURL(value)} alt="" className={styles.imgType} />}
                 </span>
                 <img src="/g.png" alt="" className={styles.nikkeImg} />
               </div>

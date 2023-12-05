@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import NikkeMsgEdit from './NikkeMsgEdit';
 import { INikkeData, Project, msgType } from '../script/project';
@@ -14,6 +15,7 @@ interface NikkeMessageProps {
   dialogData: Project;
   isEdit: boolean;
   onDelete: (index: number) => void;
+  saveMsg: (pro: Project) => void;
 }
 
 const NikkeMessage = ({
@@ -25,6 +27,7 @@ const NikkeMessage = ({
   dialogData,
   isEdit,
   onDelete,
+  saveMsg,
 }: NikkeMessageProps) => {
   // const [dialogData, setDialogData] = useState(initialData);
   const [msgs, setMsgs] = useState(initialMsgs);
@@ -61,6 +64,7 @@ const NikkeMessage = ({
       msgs.splice(index + 1, 0, '插入的数据');
     } */
   };
+
   const editMsg = (index: number) => {
     if (editInputs.includes(index)) {
       lostfocus(index);
@@ -82,13 +86,25 @@ const NikkeMessage = ({
       newMsgs.splice(index, 1);
       setMsgs(newMsgs);
     }
+    saveMsg(dialogData);
     console.log('删除');
   }
 
-  const parseImgToDataURL = (content: string) => {
+  /*   const parseImgToDataURL = (content: string) => {
     let value = content.split(' ');
     let index: string = value[1].substring(1, value[1].length - 1);
     return parseInt(index);
+  }; */
+
+  const parseImgToDataURL = (content: string) => {
+    const matches = content.match(/\[url\]\[base64:\]\s*\[([^\]]+)\]/);
+
+    if (matches && matches[1]) {
+      const index = matches[1];
+      return index;
+    }
+
+    return ''; // 如果没有匹配到索引，返回 字符串
   };
 
   return (
@@ -119,7 +135,7 @@ const NikkeMessage = ({
                   </span>
                 ) : (
                   <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                    <Image src={currentData[parseImgToDataURL(value)]} alt="" className={styles.imgType} />
+                    <img src={parseImgToDataURL(value)} alt="" className={styles.imgType} />
                   </span>
                 )}
                 <Image src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
@@ -152,13 +168,7 @@ const NikkeMessage = ({
               ) : (
                 <>
                   <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                    <Image
-                      src={currentData[parseImgToDataURL(value)]}
-                      alt=""
-                      width={30}
-                      height={30}
-                      className={styles.imgType}
-                    />
+                    <Image src={parseImgToDataURL(value)} alt="" width={30} height={30} className={styles.imgType} />
                   </span>
                 </>
               )}
@@ -174,14 +184,9 @@ const NikkeMessage = ({
           {msgs.map((value, index) => (
             <div className={styles.ztextbox} key={index}>
               <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                <Image
-                  src={currentData[parseImgToDataURL(value)]}
-                  alt=""
-                  width={200}
-                  height={205}
-                  className={styles.imgType}
-                />
+                <img src={parseImgToDataURL(value)} alt="" width={200} height={205} className={styles.imgType} />
               </span>
+
               <Image src="/rg.png" alt="" width={16} height={16} className={styles.znikkeImg} />
               {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}
             </div>
@@ -197,15 +202,9 @@ const NikkeMessage = ({
             {msgs.map((value, index) => (
               <div className={styles.textbox} key={index}>
                 <span className={`${styles.text}  ${styles.toimg}`}>
-                  {currentData[parseImgToDataURL(value)] && (
-                    <Image
-                      src={currentData[parseImgToDataURL(value)]}
-                      alt=""
-                      width={200}
-                      height={205}
-                      className={styles.imgType}
-                    />
-                  )}
+                  <>
+                    <img src={parseImgToDataURL(value)} alt="" width={200} height={205} className={styles.imgType} />
+                  </>
                 </span>
                 <Image src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
                 {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}

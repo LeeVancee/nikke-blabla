@@ -1,3 +1,5 @@
+//import { getDataByKey } from '../data/useIndexedDB';
+
 export enum ProjectType {
   Task, // 任务
   Nikke, // 妮姬
@@ -16,6 +18,7 @@ export enum msgType {
   img = '图片',
   aside = '旁白',
   partition = '分割',
+  branch = '分支',
 }
 
 export enum exportImgType {
@@ -23,9 +26,13 @@ export enum exportImgType {
   jpeg,
 }
 
-//枚举企业
+export enum ImgType {
+  localImage, // 本地表情
+  builtinImage, // 内置表情
+  difference, // 差分
+}
+
 export enum enterprise {
-  全部,
   极乐净土,
   米西利斯,
   泰特拉,
@@ -53,13 +60,7 @@ export class Project {
   type: ProjectType;
   messageData: ChatMessageData;
   projectNikkes: Array<INikkeData> = [];
-  constructor(
-    name: string,
-    description: string,
-    author: string,
-    type: ProjectType,
-    messageData: ChatMessageData
-  ) {
+  constructor(name: string, description: string, author: string, type: ProjectType, messageData: ChatMessageData) {
     this.name = name;
     this.description = description;
     this.type = type == undefined ? ProjectType.Nikke : type;
@@ -78,6 +79,26 @@ export interface IProjectData {
   datas: Array<Project>;
 }
 
+export interface Database {
+  sequenceId: number;
+  projects: string;
+}
+
+import { getDataByKey, addData } from '../data/useIndexedDB';
+
+// 2. 添加数据
+export const addDataToDB = async (dbPromise: Promise<IDBDatabase>, storeName: string, data: any) => {
+  const db: IDBDatabase = await dbPromise;
+  addData(db, storeName, data);
+};
+
+// 获取数据
+export const retrieveDataFromDB = async (dbPromise: Promise<IDBDatabase>, storeName: string, key: number) => {
+  const db = await dbPromise;
+  const result: any = await getDataByKey(db, storeName, key);
+  return result;
+};
+
 export interface ImgConfig {
   width: number;
   maxWidth: number;
@@ -93,6 +114,42 @@ export interface INikkeData {
   img: string;
   enterprise: enterprise;
 }
+
+export enum NikkeDatabase {
+  nikkeProject = 'nikkeProject',
+  nikkeData = 1,
+  nikkeTotalImages = 2,
+}
+
+export let builtinImageDatas: Array<string> = [
+  'https://s2.loli.net/2023/12/01/vy4JO3apusDLZjR.png',
+  'https://s2.loli.net/2023/12/01/wxY5MP7HAaeN8js.png',
+  'https://s2.loli.net/2023/12/01/EnhasZoLiFm3Pyu.png',
+  'https://s2.loli.net/2023/12/01/eYOfRQ1BcqXbzaH.png',
+  'https://s2.loli.net/2023/12/01/gL2NleqUuXybBRJ.png',
+  'https://s2.loli.net/2023/12/01/S8VNgCTyWsHLOq6.png',
+  'https://s2.loli.net/2023/12/01/cSs98mHpoIZeLbM.png',
+  'https://s2.loli.net/2023/12/01/xuqTpV2GtBR6zDy.png',
+  'https://s2.loli.net/2023/12/01/a1rmkng6FlUBA5d.png',
+  'https://s2.loli.net/2023/12/01/cNOA23b6fvnGJRF.png',
+  'https://s2.loli.net/2023/12/01/kJzmf2s4u6EFrdy.png',
+  'https://s2.loli.net/2023/12/01/zJwd9mHWtPyUc4f.png',
+];
+
+/* export let builtinImageDatas: Array<string> = [
+  'icn_emote_anger.png',
+  'icn_emote_cheerup.png',
+  'icn_emote_delight.png',
+  'icn_emote_hello.png',
+  'icn_emote_kidkid.png',
+  'icn_emote_sad.png',
+  'icn_emote_suprise.png',
+  'icn_emote_thanks.png',
+  'icn_currency_friend_point.png',
+  'icn_currency_summon_scroll.png',
+  'icn_currency_summon_scroll_character_customize.png',
+  'icn_currency_summon_scroll_company.png',
+]; */
 
 // nikke 数据
 export var nikkeData: Inikkes = {
@@ -212,6 +269,7 @@ export var nikkeData: Inikkes = {
     { name: 'gg', img: 'gg', enterprise: enterprise.配角 },
     { name: '莱伊', img: 'ly', enterprise: enterprise.泰特拉 },
     { name: '诺亚尔', img: 'nye', enterprise: enterprise.泰特拉 },
+    { name: '诺亚尔', img: 'nye1', enterprise: enterprise.泰特拉 },
     { name: '布兰儿', img: 'ble', enterprise: enterprise.泰特拉 },
     { name: '梅里：海湾女神', img: 'sml', enterprise: enterprise.泰特拉 },
     { name: '阿妮斯：闪耀夏日', img: 'sans', enterprise: enterprise.泰特拉 },
@@ -223,16 +281,21 @@ export var nikkeData: Inikkes = {
     { name: 'iDoll海', img: 'idhai', enterprise: enterprise.泰特拉 },
     { name: 'iDoll太阳', img: 'idty', enterprise: enterprise.泰特拉 },
     { name: '白雪公主', img: 'cbxgz', enterprise: enterprise.朝圣者 },
+    { name: '白雪公主：纯真年代', img: 'cxbx', enterprise: enterprise.朝圣者 },
     { name: '红莲', img: 'chli', enterprise: enterprise.朝圣者 },
+    { name: '红莲', img: 'clhl', enterprise: enterprise.朝圣者 },
     { name: '诺雅', img: 'cny', enterprise: enterprise.朝圣者 },
     { name: '哈兰', img: 'chl', enterprise: enterprise.朝圣者 },
     { name: '长发公主', img: 'ccfgz', enterprise: enterprise.朝圣者 },
+    { name: '长发公主', img: 'clcfgz', enterprise: enterprise.朝圣者 },
     { name: '伊莎贝尔', img: 'cysbe', enterprise: enterprise.朝圣者 },
     { name: '玛丽安', img: 'csf', enterprise: enterprise.朝圣者 },
     { name: '玛丽安', img: 'sf1', enterprise: enterprise.朝圣者 },
     { name: '桃乐丝', img: 'ctls', enterprise: enterprise.朝圣者 },
     { name: '小红帽', img: 'xhm', enterprise: enterprise.朝圣者 },
-    { name: '白雪公主：纯真年代', img: 'cxbx', enterprise: enterprise.朝圣者 },
+    { name: '莉莉维丝', img: 'clls', enterprise: enterprise.朝圣者 },
+    { name: '灰姑娘', img: 'chgn', enterprise: enterprise.朝圣者 },
+    { name: '指挥官', img: 'cdzhg', enterprise: enterprise.朝圣者 },
     { name: 'Npc 1', img: 'npc1', enterprise: enterprise.配角 },
     { name: 'Npc 2', img: 'npc2', enterprise: enterprise.配角 },
     { name: 'Npc 3', img: 'npc3', enterprise: enterprise.配角 },
@@ -244,6 +307,8 @@ export var nikkeData: Inikkes = {
     { name: 'Npc 9', img: 'npc9', enterprise: enterprise.配角 },
     { name: 'Npc 10', img: 'npc10', enterprise: enterprise.配角 },
     { name: 'Npc 11', img: 'npc11', enterprise: enterprise.配角 },
+    { name: '芙蕾西亚', img: 'npc12', enterprise: enterprise.配角 },
+    { name: '奥斯华', img: 'npc13', enterprise: enterprise.配角 },
     { name: '量产妮姬 1', img: 'lc1', enterprise: enterprise.配角 },
     { name: '量产妮姬 2', img: 'lc2', enterprise: enterprise.配角 },
     { name: '量产妮姬 3', img: 'lc3', enterprise: enterprise.配角 },

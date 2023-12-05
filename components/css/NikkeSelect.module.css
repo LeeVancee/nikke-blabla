@@ -1,0 +1,39 @@
+.nikkeGrid {
+  display: grid;
+  grid-template-columns: 65px 65px 65px 65px;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  gap: 5px;
+  row-gap: 0;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  padding: 5px 0;
+}
+.nikke {
+  width: 60px;
+  height: 60px;
+  margin: 5px;
+  background-color: #c6c6c6;
+  border-radius: 5px;
+  border: 2px #c6c6c6 solid;
+  /* background-image: url("/nikke/bx.png"); */
+  background-repeat: no-repeat;
+  background-size: 60px 60px;
+  transition: border 0.1s ease-in-out;
+}
+.nikkeCheck {
+  border: 2px #32b1f4 solid;
+}
+.nikkeCheck::before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 60px;
+  background-color: #1a151559;
+  background-image: url('/select.png');
+  background-repeat: no-repeat;
+  background-size: 48px;
+  background-position: center center;
+  opacity: 0.8;
+}
