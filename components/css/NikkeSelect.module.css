@@ -27,11 +27,11 @@
 }
 .nikkeCheck::before {
   content: '';
-  display: block;
+
   width: 60px;
   height: 60px;
   background-color: #1a151559;
-  background-image: url('/select.png');
+
   background-repeat: no-repeat;
   background-size: 48px;
   background-position: center center;

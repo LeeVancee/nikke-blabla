@@ -433,7 +433,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
             cancel={addNikkeWindow.close}
           >
             <div>
-              <NikkeSelect filteredData={dialogData?.projectNikkes} onFilteredData={handleFilteredData} />
+              <NikkeSelect filteredData={filteredData} onFilteredData={handleFilteredData} />
             </div>
           </NikkeWindow>
         )}
