@@ -120,7 +120,7 @@ export enum NikkeDatabase {
   nikkeData = 1,
   nikkeTotalImages = 2,
 }
-
+/* 
 export let builtinImageDatas: Array<string> = [
   'https://s2.loli.net/2023/12/01/vy4JO3apusDLZjR.png',
   'https://s2.loli.net/2023/12/01/wxY5MP7HAaeN8js.png',
@@ -134,22 +134,22 @@ export let builtinImageDatas: Array<string> = [
   'https://s2.loli.net/2023/12/01/cNOA23b6fvnGJRF.png',
   'https://s2.loli.net/2023/12/01/kJzmf2s4u6EFrdy.png',
   'https://s2.loli.net/2023/12/01/zJwd9mHWtPyUc4f.png',
-];
-
-/* export let builtinImageDatas: Array<string> = [
-  'icn_emote_anger.png',
-  'icn_emote_cheerup.png',
-  'icn_emote_delight.png',
-  'icn_emote_hello.png',
-  'icn_emote_kidkid.png',
-  'icn_emote_sad.png',
-  'icn_emote_suprise.png',
-  'icn_emote_thanks.png',
-  'icn_currency_friend_point.png',
-  'icn_currency_summon_scroll.png',
-  'icn_currency_summon_scroll_character_customize.png',
-  'icn_currency_summon_scroll_company.png',
 ]; */
+
+export let builtinImageDatas: Array<string> = [
+  '/emojis/icn_emote_anger.png',
+  '/emojis/icn_emote_cheerup.png',
+  '/emojis/icn_emote_delight.png',
+  '/emojis/icn_emote_hello.png',
+  '/emojis/icn_emote_kidkid.png',
+  '/emojis/icn_emote_sad.png',
+  '/emojis/icn_emote_suprise.png',
+  '/emojis/icn_emote_thanks.png',
+  '/emojis/icn_currency_friend_point.png',
+  '/emojis/icn_currency_summon_scroll.png',
+  '/emojis/icn_currency_summon_scroll_character_customize.png',
+  '/emojis/icn_currency_summon_scroll_company.png',
+];
 
 // nikke 数据
 export var nikkeData: Inikkes = {

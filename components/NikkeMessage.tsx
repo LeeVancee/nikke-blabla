@@ -19,7 +19,7 @@ interface NikkeMessageProps {
 }
 
 const NikkeMessage = ({
-  msgs: initialMsgs,
+  msgs,
   nikke,
   type,
   index: currentIndex,
@@ -30,7 +30,7 @@ const NikkeMessage = ({
   saveMsg,
 }: NikkeMessageProps) => {
   // const [dialogData, setDialogData] = useState(initialData);
-  const [msgs, setMsgs] = useState(initialMsgs);
+  // const [msgs, setMsgs] = useState(initialMsgs);
   //const spaceRefs = useRef([]);
   const spaceRefs = useRef<HTMLInputElement>(null);
   const [editContent, setEditContent] = useState('');
@@ -77,14 +77,15 @@ const NikkeMessage = ({
     const newMsgs = [...msgs];
 
     if (msgs.length === 1) {
-      newMsgs.splice(index, 1);
+      msgs.splice(index, 1);
 
-      setMsgs(newMsgs);
+      //  setMsgs(newMsgs);
+      // msgs
 
       onDelete(currentIndex);
     } else {
-      newMsgs.splice(index, 1);
-      setMsgs(newMsgs);
+      msgs.splice(index, 1);
+      //   setMsgs(newMsgs);
     }
     saveMsg(dialogData);
     console.log('删除');
@@ -168,7 +169,7 @@ const NikkeMessage = ({
               ) : (
                 <>
                   <span className={`${styles.text} ${styles.mzhg} ${styles.toimg}`}>
-                    <Image src={parseImgToDataURL(value)} alt="" width={30} height={30} className={styles.imgType} />
+                    <Image src={parseImgToDataURL(value)} alt="" width={200} height={205} className={styles.imgType} />
                   </span>
                 </>
               )}
@@ -202,9 +203,7 @@ const NikkeMessage = ({
             {msgs.map((value, index) => (
               <div className={styles.textbox} key={index}>
                 <span className={`${styles.text}  ${styles.toimg}`}>
-                  <>
-                    <img src={parseImgToDataURL(value)} alt="" width={200} height={205} className={styles.imgType} />
-                  </>
+                  <img src={parseImgToDataURL(value)} alt="" width={200} height={205} className={styles.imgType} />
                 </span>
                 <Image src="/g.png" alt="" width={16} height={16} className={styles.nikkeImg} />
                 {isEdit && <NikkeMsgEdit add={addMsg} edit={editMsg} deleted={deleteMsg} currentIndex={index} />}
