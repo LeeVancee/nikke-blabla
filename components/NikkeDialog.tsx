@@ -124,9 +124,10 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
 
     if (currentModel === msgType.img && currentSelectImage !== -1) {
       newInfo.msgType = msgType.img;
-      console.log(currentSelectImage);
+
       if (currentImageType === ImgType.localImage) {
         newInfo.msg.push(`[url][base64:] [${totalImages[currentSelectImage]}]`);
+        console.log(newInfo.msg);
       } else if (currentImageType === ImgType.builtinImage) {
         newInfo.msg.push(`[url][base64:] [${builtinImageDatas[currentSelectImage]}]`);
       } else {
@@ -185,7 +186,6 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
 
       setInputContent('');
     }
-    setDialogData({ ...dialogData, messageData: { ...dialogData.messageData, list: updatedList } });
 
     saveMsg(dialogData);
   };
