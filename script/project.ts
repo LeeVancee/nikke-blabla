@@ -149,6 +149,9 @@ export let builtinImageDatas: Array<string> = [
   '/emojis/icn_currency_summon_scroll.png',
   '/emojis/icn_currency_summon_scroll_character_customize.png',
   '/emojis/icn_currency_summon_scroll_company.png',
+  '/emojis/icn_doro_1.png',
+  '/emojis/icn_doro_2.png',
+  '/emojis/icn_doro_3.png',
 ];
 
 // nikke 数据

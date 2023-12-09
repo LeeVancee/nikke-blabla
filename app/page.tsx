@@ -221,12 +221,10 @@ export default function Home() {
   }
 
   function deleteDialog(index: number) {
-    const updatedDatas = [...project.datas];
-    updatedDatas.splice(index, 1);
-    const updatedProject = { ...project, datas: updatedDatas };
-    setProject(updatedProject);
+    project.datas.splice(index, 1);
+    setFilteredData(project.datas);
 
-    let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
+    let data: Database = { sequenceId: 1, projects: JSON.stringify(project.datas) };
     addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
   }
   function dialogExport(index: number) {
