@@ -316,6 +316,8 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   };
 
   const exportRealToImg = () => {
+    console.log(preview);
+
     if (exportType === exportImgType.png.toString()) {
       setCurrentExportImgState(exportImgState.run);
 
@@ -420,6 +422,10 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     currentExportImgState,
     exportImgState,
   };
+
+  useEffect(() => {
+    console.log(preview.current);
+  }, []);
 
   return (
     <>

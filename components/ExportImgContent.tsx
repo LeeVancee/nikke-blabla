@@ -4,6 +4,7 @@ import dialogStyles from '@/components/css/NikkeDialog.module.css';
 import { exportImgType } from '@/script/project';
 import NikkeInfo from './NikkeInfo';
 import NikkeRadio from './NikkeRadio';
+import { useEffect } from 'react';
 const ExportImgContent = ({
   preview,
   imgName,
