@@ -2,7 +2,7 @@
 'use client';
 import NikkeMsgEdit from './NikkeMsgEdit';
 import { INikkeData, Project, msgType } from '../script/project';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import styles from './css/NikkeMessage.module.css';
 import Image from 'next/image';
 
@@ -82,7 +82,8 @@ const NikkeMessage = ({
       //  setMsgs(newMsgs);
       // msgs
 
-      onDelete(currentIndex);
+      // onDelete(currentIndex);
+      dialogData.messageData.list.splice(currentIndex, 1);
     } else {
       msgs.splice(index, 1);
       //   setMsgs(newMsgs);

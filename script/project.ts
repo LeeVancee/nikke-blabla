@@ -33,6 +33,7 @@ export enum ImgType {
 }
 
 export enum enterprise {
+  ALL,
   极乐净土,
   米西利斯,
   泰特拉,
