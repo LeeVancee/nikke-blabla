@@ -423,10 +423,6 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     exportImgState,
   };
 
-  useEffect(() => {
-    console.log(preview.current);
-  }, []);
-
   return (
     <>
       <div style={{ width: '100%', height: '75%', position: 'absolute' }}>
