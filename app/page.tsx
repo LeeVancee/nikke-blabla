@@ -118,19 +118,6 @@ export default function Home() {
         addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
       }
     });
-
-    /* // 从本地存储中获取项目数据
-    const storedProjects = localStorage.getItem('projects');
-
-    if (storedProjects === null) {
-      // 如果本地存储中没有项目数据，则将初始数据存储到本地存储中
-      // localStorage.setItem('projects', JSON.stringify(initialProject));
-    } else {
-      // 如果本地存储中有项目数据，则使用它来更新项目状态
-      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
-       localStorage.setItem('cData', storedProjects);
-      localStorage.removeItem('projects');
-    } */
   };
 
   useEffect(() => {
@@ -163,20 +150,15 @@ export default function Home() {
           datas: [...prevProject.datas, pro],
         };
 
-        // 更新數據到 indexDB
-        /* let str = JSON.stringify(updatedProject);
-        console.log('更新对象项目到indexDB中');
-        let data = { sequenceId: 1, projects: str };
-        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data); */
-        handleSaveMsg(pro);
+        setFilteredData([...prevProject.datas, pro]);
 
         return updatedProject;
       });
-
+      handleSaveMsg(pro);
+      updateData();
       // 清空其他状态
       setIsSelect([]);
       setSelectNikke([]);
-      console.log('更新对象项目到localStorage中');
       selectTab(pro.type.valueOf());
       setProName('默认对话');
       setProType(ProjectType.Nikke);
@@ -202,11 +184,22 @@ export default function Home() {
   };
 
   // 保存对话函数
-  const handleSaveMsg = (pro: Project) => {
+  /*   const handleSaveMsg = (pro: Project) => {
     project.datas[currentProject] = pro;
-    // localStorage.setItem('projects', JSON.stringify(project));
+    
     let data: Database = { sequenceId: 1, projects: JSON.stringify(project) };
     addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+  }; */
+  const handleSaveMsg = (pro: Project) => {
+    setProject((prevProject) => {
+      const updatedProject = { ...prevProject };
+      updatedProject.datas[currentProject] = pro;
+
+      let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
+      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+
+      return updatedProject;
+    });
   };
 
   const handleCurrentProject = (index: number) => {
@@ -221,11 +214,19 @@ export default function Home() {
   }
 
   function deleteDialog(index: number) {
-    project.datas.splice(index, 1);
-    setFilteredData(project.datas);
+    setProject((prevProject) => {
+      const updatedDatas = [...prevProject.datas];
+      updatedDatas.splice(index, 1);
 
-    let data: Database = { sequenceId: 1, projects: JSON.stringify(project.datas) };
-    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+      const updatedProject = { ...prevProject, datas: updatedDatas };
+      setFilteredData(updatedDatas);
+
+      let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
+      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+      // updateData();
+
+      return updatedProject;
+    });
   }
   function dialogExport(index: number) {
     let currentData = project.datas[index];
