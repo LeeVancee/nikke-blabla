@@ -2,10 +2,6 @@
 import styles from '@/app/page.module.css';
 import ProjectCard from '../ProjectCard';
 import { Project } from '@/script/project';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { useState } from 'react';
-import NikkeDialog from '../NikkeDialog';
-import saveAs from 'file-saver';
 
 interface ContentProps {
   filteredData?: Project[];

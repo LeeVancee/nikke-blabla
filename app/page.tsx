@@ -44,6 +44,16 @@ export default function Home() {
   const [author, setAuthor] = useState('');
   const [currentTime, setCurrentTime] = useState('');
 
+  const selectTab = useCallback(
+    (index: number) => {
+      setCurrentTabId(index);
+      const newData = project.datas.filter((item) => item.type === index);
+      setFilteredData(newData);
+      setListNumber(newData.length);
+    },
+    [project.datas]
+  );
+
   useEffect(() => {
     function updateTime() {
       const now = new Date();
@@ -58,20 +68,15 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    // 在 selectTab 更新后再执行相关操作
+
+    selectTab(1);
+  }, [selectTab]);
+
   function formatTime(time: any) {
     return time < 10 ? `0${time}` : time;
   }
-
-  const selectTab = useCallback(
-    (index: number) => {
-      setCurrentTabId(index);
-      // 过滤数据
-      const newData = project.datas.filter((item) => item.type === index);
-      setFilteredData(newData);
-      setListNumber(newData.length);
-    },
-    [project.datas]
-  );
 
   const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectType(e.target.value);
@@ -80,55 +85,47 @@ export default function Home() {
   const buttonStyle = { width: '150px', height: '45px', margin: '5px' };
 
   function select(value: any, index: any) {
-    setProName((prevProName) => {
-      if (isSelect.length > 0 && isSelect.some((isSelected) => isSelected)) {
-        // 多选时将 proName 设置为 '空'
-        return '';
-      } else {
-        return value.name;
-      }
-    });
+    let selected = [...selectNikke];
+    const isSelected = [...isSelect];
+    if (isSelect.length > 0 && isSelect.some((isSelected) => isSelected)) {
+      // 多选时将 proName 设置为 '空'
+      setProName('');
+    } else {
+      setProName(value.name);
+    }
 
-    setSelectNikke((prevSelectNikke) => {
-      if (!prevSelectNikke.some((item) => item.img === value.img)) {
-        return [...prevSelectNikke, value];
-      } else {
-        return prevSelectNikke.filter((item) => item.img !== value.img);
-      }
-    });
+    if (!selected.some((item) => item.img === value.img)) {
+      selected.push(value);
+      isSelected[index] = true;
+    } else {
+      selected = selected.filter((item) => item.img !== value.img);
+      isSelected[index] = false;
+    }
 
-    setIsSelect((prevIsSelect) => {
-      const updatedIsSelect = [...prevIsSelect];
-      updatedIsSelect[index] = !prevIsSelect[index];
-      return updatedIsSelect;
-    });
+    // 更新状态
+    setSelectNikke(selected);
+    setIsSelect(isSelected);
+    console.log('已选nikke：', selectNikke);
   }
 
   const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
 
-  const initProject = () => {
+  const initProject = useCallback(() => {
     retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData).then((value) => {
       if (value) {
         const parsedProject = JSON.parse(value.projects);
         console.log('已经有数据了！', parsedProject);
         setProject(parsedProject);
-        selectTab(1);
       } else {
         console.log('没有数据，数据写入中……');
         addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
       }
     });
-  };
+  }, []); // 移除 project 作为依赖项
 
   useEffect(() => {
     initProject();
-  }, []);
-  useEffect(() => {
-    // 过滤数据
-    const newData = project.datas.filter((item) => item.type === currentTabId);
-    setFilteredData(newData);
-    setListNumber(newData.length);
-  }, [currentTabId, project.datas]);
+  }, [initProject]);
 
   const checkData = () => proName !== '' && author !== '' && selectNikke.length !== 0;
 
@@ -138,24 +135,13 @@ export default function Home() {
         list: [],
       };
       const pro: Project = new Project(proName, proDesc, author, parseInt(selectType), msgData);
-      console.log(proDesc);
+      pro.projectNikkes = selectNikke;
+      const updatedProject = { ...project };
+      updatedProject.datas = [...project.datas, pro];
 
-      selectNikke.forEach((item) => pro.projectNikkes.push(item));
-      console.log(pro);
-
-      // 使用 setProject 更新状态
-      setProject((prevProject) => {
-        const updatedProject = {
-          ...prevProject,
-          datas: [...prevProject.datas, pro],
-        };
-
-        setFilteredData([...prevProject.datas, pro]);
-
-        return updatedProject;
-      });
       handleSaveMsg(pro);
-      updateData();
+      updateData(updatedProject);
+      setProject(updatedProject);
       // 清空其他状态
       setIsSelect([]);
       setSelectNikke([]);
@@ -184,50 +170,34 @@ export default function Home() {
   };
 
   // 保存对话函数
-  /*   const handleSaveMsg = (pro: Project) => {
-    project.datas[currentProject] = pro;
-    
-    let data: Database = { sequenceId: 1, projects: JSON.stringify(project) };
-    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
-  }; */
+
   const handleSaveMsg = (pro: Project) => {
-    setProject((prevProject) => {
-      const updatedProject = { ...prevProject };
-      updatedProject.datas[currentProject] = pro;
-
-      let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
-      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
-
-      return updatedProject;
-    });
+    const updatedProject = { ...project };
+    updatedProject.datas[currentProject] = pro;
+    let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
+    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+    setProject(updatedProject);
   };
 
   const handleCurrentProject = (index: number) => {
     setCurrentProject(index);
   };
 
-  function updateData() {
-    let str = JSON.stringify(project);
+  function updateData(pro: { datas: Project[] }) {
+    let str = JSON.stringify(pro);
     console.log('更新对象项目到indexDB中');
     let data: Database = { sequenceId: 1, projects: str };
     addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
   }
 
-  function deleteDialog(index: number) {
-    setProject((prevProject) => {
-      const updatedDatas = [...prevProject.datas];
-      updatedDatas.splice(index, 1);
-
-      const updatedProject = { ...prevProject, datas: updatedDatas };
-      setFilteredData(updatedDatas);
-
-      let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
-      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
-      // updateData();
-
-      return updatedProject;
-    });
-  }
+  const deleteDialog = (index: number) => {
+    const updatedDatas = [...project.datas];
+    updatedDatas.splice(index, 1);
+    const updatedProject = { ...project, datas: updatedDatas };
+    updateData(updatedProject);
+    // setFilteredData(updatedDatas);
+    setProject(updatedProject);
+  };
   function dialogExport(index: number) {
     let currentData = project.datas[index];
     downloadJson(currentData, 'data.json');

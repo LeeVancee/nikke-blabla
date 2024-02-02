@@ -38,7 +38,7 @@ interface NikkeDialogProps {
 
 const initialTypeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
 
-const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: NikkeDialogProps) => {
+const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProps) => {
   const openExportImg = useOpenExportImg();
   const fileInput = useRef<HTMLInputElement>(null);
   const [typeList, setTypeList] = useState(initialTypeList);
@@ -53,7 +53,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
-  const [dialogData, setDialogData] = useState(initialData);
+  //  const [dialogData, setDialogData] = useState(initialData);
   const scrollContainer = useRef<HTMLDivElement | null>(null);
   const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
@@ -138,7 +138,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
     }
     const newDialogData = { ...dialogData };
     newDialogData.messageData.list.push(newInfo);
-    setDialogData(newDialogData);
+    //  setDialogData(newDialogData);
 
     setInputContent('');
     saveMsg(dialogData);
@@ -282,7 +282,7 @@ const NikkeDialog = ({ dialogData: initialData, back, currentTime, saveMsg }: Ni
 
     newDialogData.messageData.list.splice(index, 1);
 
-    setDialogData(newDialogData);
+    // setDialogData(newDialogData);
   }
 
   const cancel = () => {
