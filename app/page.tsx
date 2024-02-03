@@ -121,7 +121,7 @@ export default function Home() {
         addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
       }
     });
-  }, []); // 移除 project 作为依赖项
+  }, []);
 
   useEffect(() => {
     initProject();
@@ -195,7 +195,6 @@ export default function Home() {
     updatedDatas.splice(index, 1);
     const updatedProject = { ...project, datas: updatedDatas };
     updateData(updatedProject);
-    // setFilteredData(updatedDatas);
     setProject(updatedProject);
   };
   function dialogExport(index: number) {
