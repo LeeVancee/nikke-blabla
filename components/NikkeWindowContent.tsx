@@ -4,7 +4,7 @@ import { INikkeData, nikke, nikkeData } from '@/script/project';
 import NikkeRadio from './NikkeRadio';
 import NikkeInfo from './NikkeInfo';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface NikkeWindowContentProps {
   proName: string;
@@ -39,18 +39,15 @@ const NikkeWindowContent = ({
 
   const selectEnterprise = (enterprise: any) => {
     setSelectedEnterprise(enterprise);
-  };
 
-  useEffect(() => {
-    // 按企业筛选妮姬  企业为枚举类型  0 为全部  1 为极乐净土  2 为米西里斯  3 为泰特拉  4 为朝圣者  5 为反常
-    if (selectedEnterprise !== 0) {
-      const newFilteredNikkes = nikkeData.nikkes.filter((nikke) => nikke.enterprise === selectedEnterprise);
-
+    // 直接在这里进行筛选
+    if (enterprise !== 0) {
+      const newFilteredNikkes = nikkeData.nikkes.filter((nikke) => nikke.enterprise === enterprise);
       setFilteredNikkes(newFilteredNikkes);
     } else {
       setFilteredNikkes(nikkeData.nikkes);
     }
-  }, [selectedEnterprise]);
+  };
 
   return (
     <div className={styles.project}>

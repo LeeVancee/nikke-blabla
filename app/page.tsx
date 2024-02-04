@@ -44,15 +44,12 @@ export default function Home() {
   const [author, setAuthor] = useState('');
   const [currentTime, setCurrentTime] = useState('');
 
-  const selectTab = useCallback(
-    (index: number) => {
-      setCurrentTabId(index);
-      const newData = project.datas.filter((item) => item.type === index);
-      setFilteredData(newData);
-      setListNumber(newData.length);
-    },
-    [project.datas]
-  );
+  const selectTab = (index: number) => {
+    setCurrentTabId(index);
+    const newData = project.datas.filter((item) => item.type === index);
+    setFilteredData(newData);
+    setListNumber(newData.length);
+  };
 
   useEffect(() => {
     function updateTime() {
@@ -67,12 +64,6 @@ export default function Home() {
 
     return () => clearInterval(intervalId);
   }, []);
-
-  useEffect(() => {
-    // 在 selectTab 更新后再执行相关操作
-
-    selectTab(1);
-  }, [selectTab]);
 
   function formatTime(time: any) {
     return time < 10 ? `0${time}` : time;
@@ -108,24 +99,31 @@ export default function Home() {
     console.log('已选nikke：', selectNikke);
   }
 
+  //  const dbPromise = useMemo(() => openDB('nikkeDatabase') as Promise<IDBDatabase>, []);
   const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
 
-  const initProject = useCallback(() => {
-    retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData).then((value) => {
-      if (value) {
-        const parsedProject = JSON.parse(value.projects);
-        console.log('已经有数据了！', parsedProject);
-        setProject(parsedProject);
-      } else {
-        console.log('没有数据，数据写入中……');
-        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
-      }
-    });
-  }, []);
-
   useEffect(() => {
-    initProject();
-  }, [initProject]);
+    const initDatabase = async () => {
+      try {
+        const value = await retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData);
+        if (value) {
+          const parsedProject = JSON.parse(value.projects);
+          console.log('已经有数据了！', parsedProject);
+          setProject(parsedProject);
+        } else {
+          console.log('没有数据，数据写入中……');
+          await addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
+        }
+      } catch (error) {
+        console.error('Error during initialization:', error);
+      }
+    };
+
+    initDatabase();
+  }, []);
+  useEffect(() => {
+    selectTab(1);
+  }, [project]);
 
   const checkData = () => proName !== '' && author !== '' && selectNikke.length !== 0;
 
