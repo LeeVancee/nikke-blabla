@@ -46,9 +46,6 @@ export default function Home() {
 
   const selectTab = (index: number) => {
     setCurrentTabId(index);
-    const newData = project.datas.filter((item) => item.type === index);
-    setFilteredData(newData);
-    setListNumber(newData.length);
   };
 
   useEffect(() => {
@@ -121,9 +118,12 @@ export default function Home() {
 
     initDatabase();
   }, []);
+
   useEffect(() => {
-    selectTab(1);
-  }, [project]);
+    const newData = project.datas.filter((item) => item.type === currentTabId);
+    setFilteredData(newData);
+    setListNumber(newData.length);
+  }, [project, currentTabId]);
 
   const checkData = () => proName !== '' && author !== '' && selectNikke.length !== 0;
 

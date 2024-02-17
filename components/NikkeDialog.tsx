@@ -28,6 +28,7 @@ import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 import NikkeSelect from './NikkeSelect';
 import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
+import { useRouter } from 'next/navigation';
 
 interface NikkeDialogProps {
   dialogData: any;
@@ -58,6 +59,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
   const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
   const addNikkeWindow = useAddNikkeWindow();
+  const router = useRouter();
 
   function selectModel(type: msgType) {
     setInputPlaceholder('请输入对话内容');
@@ -105,6 +107,12 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
   const openFileInput = () => {
     setIsImgListView(!isImgListView);
   };
+  const scrollToBottom = useCallback(() => {
+    if (scrollContainer.current) {
+      scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
+    }
+    router.refresh();
+  }, [scrollContainer, router]);
 
   const add = useCallback(() => {
     const newInfo: ICharacterData = {
@@ -152,6 +160,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
     saveMsg,
     totalImages,
     currentImageType,
+    ,
   ]);
 
   const append = () => {
@@ -200,14 +209,9 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
     }
   };
 
-  const scrollToBottom = () => {
-    if (scrollContainer.current) {
-      scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
-    }
-  };
   useEffect(() => {
     scrollToBottom();
-  }, [add]);
+  }, [scrollToBottom, add]);
 
   const addImages = () => {
     // 将选中的图像添加到totalImages，同时检查重复，并且当数据有更新时我们将图片添加到本地数据存储中
@@ -247,21 +251,26 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
 
           setSelectedImages(newImage); */
           selectedImages.push(imageDataArray);
+          setSelectedImages(imageDataArray);
         })
         .catch((error) => {
           console.error(error);
         })
         .finally(() => {
           addImages();
+          router.refresh();
         });
     }
   };
 
-  const initialImages = () => {
+  const initialImages = useCallback(() => {
     retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
       if (value) {
-        //  totalImages = JSON.parse(value.totalImages);
-        setTotalImages(JSON.parse(value.totalImages));
+        const parsedImages = JSON.parse(value.totalImages);
+        // 判斷是否需要更新 totalImages
+        if (JSON.stringify(totalImages) !== JSON.stringify(parsedImages)) {
+          setTotalImages(parsedImages);
+        }
       } else {
         console.log('没有图片数据，数据写入中……');
         addDataToDB(dbPromise, NikkeDatabase.nikkeProject, {
@@ -270,12 +279,12 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
         });
       }
     });
-  };
+  }, [totalImages, dbPromise]); // 僅在 totalImages 或 setTotalImages 改變時更新
 
   useEffect(() => {
     // 在组件挂载时，从数据库中获取图片数据
     initialImages();
-  }, [handleFileUpload]);
+  }, [initialImages]);
 
   function handleDelete(index: any) {
     const newDialogData = { ...dialogData };
