@@ -24,7 +24,7 @@ import Contents from '@/components/contents/Contents';
 import NikkeWindowContent from '@/components/NikkeWindowContent';
 import NikkeDialog from '@/components/NikkeDialog';
 import toast from 'react-hot-toast';
-import { openDB } from '@/data/useIndexedDB';
+//import { openDB } from '@/data/useIndexedDB';
 import saveAs from 'file-saver';
 const initialProject: IProjectData = { datas: [] };
 
@@ -42,29 +42,12 @@ export default function Home() {
   const [proType, setProType] = useState(ProjectType.Nikke);
   const [proDesc, setProDesc] = useState('这是一个简单的小故事');
   const [author, setAuthor] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
 
-  const selectTab = (index: number) => {
+  console.log('render');
+
+  const selectTab = useCallback((index: number) => {
     setCurrentTabId(index);
-  };
-
-  useEffect(() => {
-    function updateTime() {
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-
-      setCurrentTime(`${formatTime(hours)}:${formatTime(minutes)}`);
-    }
-
-    const intervalId = setInterval(updateTime, 1000);
-
-    return () => clearInterval(intervalId);
   }, []);
-
-  function formatTime(time: any) {
-    return time < 10 ? `0${time}` : time;
-  }
 
   const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectType(e.target.value);
@@ -97,19 +80,15 @@ export default function Home() {
   }
 
   //  const dbPromise = useMemo(() => openDB('nikkeDatabase') as Promise<IDBDatabase>, []);
-  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
 
   useEffect(() => {
     const initDatabase = async () => {
       try {
-        const value = await retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData);
+        const value = await retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData);
         if (value) {
           const parsedProject = JSON.parse(value.projects);
           console.log('已经有数据了！', parsedProject);
           setProject(parsedProject);
-        } else {
-          console.log('没有数据，数据写入中……');
-          await addDataToDB(dbPromise, NikkeDatabase.nikkeProject, { sequenceId: 1, projects: project });
         }
       } catch (error) {
         console.error('Error during initialization:', error);
@@ -173,7 +152,7 @@ export default function Home() {
     const updatedProject = { ...project };
     updatedProject.datas[currentProject] = pro;
     let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
-    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+    addDataToDB(NikkeDatabase.nikkeProject, data);
     setProject(updatedProject);
   };
 
@@ -185,7 +164,7 @@ export default function Home() {
     let str = JSON.stringify(pro);
     console.log('更新对象项目到indexDB中');
     let data: Database = { sequenceId: 1, projects: str };
-    addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+    addDataToDB(NikkeDatabase.nikkeProject, data);
   }
 
   const deleteDialog = (index: number) => {
@@ -213,12 +192,7 @@ export default function Home() {
     <>
       {filteredData && currentProject !== -1 && (
         <div style={{ height: '100%' }}>
-          <NikkeDialog
-            dialogData={filteredData[currentProject]}
-            back={back}
-            saveMsg={handleSaveMsg}
-            currentTime={currentTime}
-          />
+          <NikkeDialog dialogData={filteredData[currentProject]} back={back} saveMsg={handleSaveMsg} />
         </div>
       )}
       <div className={styles.btnbox} style={{ height: '100%' }}>
@@ -227,7 +201,14 @@ export default function Home() {
       </div>
       <div className={styles.box}>
         <div className={`${styles.box} ${styles.back}`}>
-          <Image src={`/background.png`} alt="background" fill style={{ objectFit: 'cover' }} priority />
+          <Image
+            src={`/background.png`}
+            alt="background"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            fill
+            style={{ objectFit: 'cover' }}
+            priority
+          />
         </div>
         {createProject.isOpen && (
           <NikkeWindow
@@ -253,7 +234,7 @@ export default function Home() {
           </NikkeWindow>
         )}
 
-        <Header currentTabId={currentTabId} selectTab={selectTab} currentTime={currentTime} />
+        <Header currentTabId={currentTabId} selectTab={selectTab} />
 
         <Text listNumber={listNumber} />
 

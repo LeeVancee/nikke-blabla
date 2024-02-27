@@ -29,6 +29,8 @@ const NikkeWindow = ({
   success,
   children,
 }: NikkeWindowProps) => {
+  console.log(222);
+
   return (
     <>
       <div className={styles.black}></div>

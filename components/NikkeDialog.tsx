@@ -33,13 +33,13 @@ import { useRouter } from 'next/navigation';
 interface NikkeDialogProps {
   dialogData: any;
   back: (pro: Project) => void;
-  currentTime: any;
+
   saveMsg: (pro: Project) => void;
 }
 
 const initialTypeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
 
-const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProps) => {
+const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
   const openExportImg = useOpenExportImg();
   const fileInput = useRef<HTMLInputElement>(null);
   const [typeList, setTypeList] = useState(initialTypeList);
@@ -150,6 +150,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
 
     setInputContent('');
     saveMsg(dialogData);
+    scrollToBottom();
   }, [
     dialogData,
     currentModel,
@@ -160,7 +161,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
     saveMsg,
     totalImages,
     currentImageType,
-    ,
+    scrollToBottom,
   ]);
 
   const append = () => {
@@ -209,10 +210,6 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
     }
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [scrollToBottom, add]);
-
   const addImages = () => {
     // 将选中的图像添加到totalImages，同时检查重复，并且当数据有更新时我们将图片添加到本地数据存储中
     let sum = 0;
@@ -226,7 +223,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
 
     if (sum > 0) {
       let data = { sequenceId: NikkeDatabase.nikkeTotalImages, totalImages: JSON.stringify(totalImages) };
-      addDataToDB(dbPromise, NikkeDatabase.nikkeProject, data);
+      addDataToDB(NikkeDatabase.nikkeProject, data);
     }
   };
 
@@ -264,7 +261,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
   };
 
   const initialImages = useCallback(() => {
-    retrieveDataFromDB(dbPromise, NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
+    retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
       if (value) {
         const parsedImages = JSON.parse(value.totalImages);
         // 判斷是否需要更新 totalImages
@@ -273,18 +270,21 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
         }
       } else {
         console.log('没有图片数据，数据写入中……');
-        addDataToDB(dbPromise, NikkeDatabase.nikkeProject, {
+        addDataToDB(NikkeDatabase.nikkeProject, {
           sequenceId: NikkeDatabase.nikkeTotalImages,
           totalImages: JSON.stringify(totalImages),
         });
       }
     });
-  }, [totalImages, dbPromise]); // 僅在 totalImages 或 setTotalImages 改變時更新
+  }, [totalImages]); // 僅在 totalImages 或 setTotalImages 改變時更新
 
   useEffect(() => {
     // 在组件挂载时，从数据库中获取图片数据
     initialImages();
   }, [initialImages]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [scrollToBottom, dialogData.messageData.list.length]);
 
   function handleDelete(index: any) {
     const newDialogData = { ...dialogData };
@@ -457,7 +457,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
               <Image src="/wifi.png" alt=" Logo" width={20} height={14} />
             </span>
             <span style={{ marginLeft: '5px' }}>
-              <Timer currentTime={currentTime} />
+              <Timer />
             </span>
           </div>
           <div className={styles.dback} onClick={() => back(dialogData)}>
@@ -721,7 +721,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
               <span style={{ verticalAlign: 'middle' }}>
                 <img src="/wifi.png" alt=" Logo" style={{ width: '20px', height: '14px' }} />
               </span>
-              <Timer currentTime={currentTime} />
+              <Timer />
             </div>
             <div className={styles.dback} onClick={() => back(dialogData)}>
               <div className={styles.dtitle}>
@@ -771,13 +771,7 @@ const NikkeDialog = ({ dialogData, back, currentTime, saveMsg }: NikkeDialogProp
             cancel={cancel}
             confirm={true}
           >
-            <ExportImgContent
-              preview={preview}
-              {...props}
-              dialogData={dialogData}
-              currrentTime={currentTime}
-              totalImages={totalImages}
-            />
+            <ExportImgContent preview={preview} {...props} dialogData={dialogData} totalImages={totalImages} />
           </NikkeWindow>
         </>
       )}
