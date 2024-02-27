@@ -12,7 +12,7 @@ const initialData = [
 
 const initialProject: IProjectData = { datas: [] };
 
-const Header = ({ currentTabId, selectTab, currentTime }: any) => {
+const Header = ({ currentTabId, selectTab }: any) => {
   const data = useMemo(
     () => [
       { id: ProjectType.Task, type: '任务' },
@@ -28,7 +28,7 @@ const Header = ({ currentTabId, selectTab, currentTime }: any) => {
           <Image src="/wifi.png" alt=" Logo" width={20} height={14} />
         </span>
         <span style={{ marginLeft: '5px', display: 'inline-block' }}>
-          <Timer currentTime={currentTime} />
+          <Timer />
         </span>
         <span className={styles.logoText}>blabla Genrator</span>
       </div>
@@ -39,9 +39,7 @@ const Header = ({ currentTabId, selectTab, currentTime }: any) => {
         {data.map((value) => (
           <span
             key={value.id}
-            className={`${styles.tabName} ${
-              value.id === currentTabId ? styles.show : ''
-            }`}
+            className={`${styles.tabName} ${value.id === currentTabId ? styles.show : ''}`}
             onClick={() => selectTab(value.id)}
           >
             {value.type}
