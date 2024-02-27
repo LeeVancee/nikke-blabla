@@ -16,7 +16,6 @@ import {
   ImgType,
   builtinImageDatas,
 } from '../script/project';
-import { openDB } from '../data/useIndexedDB';
 import Timer from './Timer';
 import NikkeMessage from './NikkeMessage';
 import useOpenExportImg from '@/hooks/useOpenExportImg';
@@ -56,7 +55,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
   const inputRef = useRef(null);
   //  const [dialogData, setDialogData] = useState(initialData);
   const scrollContainer = useRef<HTMLDivElement | null>(null);
-  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
+
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
   const addNikkeWindow = useAddNikkeWindow();
   const router = useRouter();
@@ -149,7 +148,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     //  setDialogData(newDialogData);
 
     setInputContent('');
-    saveMsg(dialogData);
+    saveMsg(newDialogData);
     scrollToBottom();
   }, [
     dialogData,
@@ -196,7 +195,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
 
       setInputContent('');
     }
-
+    scrollToBottom();
     saveMsg(dialogData);
   };
 
@@ -294,20 +293,11 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     // setDialogData(newDialogData);
   }
 
-  const cancel = () => {
-    openExportImg.close();
-  };
-
   enum exportImgState {
     pause,
     run,
   }
 
-  const [scale, setScale] = useState(2);
-  const [quality, setQuality] = useState(0.95);
-  const [exportType, setExportType] = useState('0');
-  const [imgName, setImgName] = useState(dialogData.name);
-  const [mark, setMark] = useState(true);
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
   const [currentExportImgState, setCurrentExportImgState] = useState(exportImgState.pause);
   const preview = useRef<HTMLDivElement | null>(null);
@@ -324,7 +314,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     setFilteredData(newFilteredData);
   };
 
-  const exportRealToImg = () => {
+  /*  const exportRealToImg = () => {
     console.log(preview);
 
     if (exportType === exportImgType.png.toString()) {
@@ -383,7 +373,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     } else {
       toast.error('图片格式不支持');
     }
-  };
+  }; */
   function clamp(vaule: number, min: number, max: number) {
     if (vaule < min) {
       return min;
@@ -396,58 +386,32 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     return vaule;
   }
 
-  // 处理函数
-  const handleExportType = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setExportType(e.target.value);
-  };
-  const handleImgName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImgName(e.target.value);
-  };
-  const handleScale = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setScale(Number(e.target.value));
-  };
-  const handleQuality = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuality(Number(e.target.value));
-  };
-  const handleMark = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMark(e.target.checked);
-  };
-
   const selectType = (index: number) => {
     setCurrentImageType(index);
     console.log(index);
   };
   const props = {
-    mark,
-    imgName,
-    exportType,
-    scale,
-    quality,
-    handleImgName,
-    handleExportType,
-    handleQuality,
-    handleScale,
-    handleMark,
+    dialogData,
     currentExportImgState,
     exportImgState,
+    dialogImg,
   };
 
   return (
     <>
       <div style={{ width: '100%', height: '75%', position: 'absolute' }}>
-        {addNikkeWindow.isOpen && (
-          <NikkeWindow
-            title="添加新的妮姬对象"
-            confirm={false}
-            buttonCancel="取消"
-            buttonSuccess="添加"
-            cancel={addNikkeWindow.close}
-          >
-            <div>
-              <NikkeSelect filteredData={filteredData} onFilteredData={handleFilteredData} />
-            </div>
-          </NikkeWindow>
-        )}
+        <NikkeWindow
+          title="添加新的妮姬对象"
+          confirm={false}
+          buttonCancel="取消"
+          buttonSuccess="添加"
+          cancel={addNikkeWindow.close}
+          show={addNikkeWindow.isOpen}
+        >
+          <div>
+            <NikkeSelect filteredData={filteredData} onFilteredData={handleFilteredData} />
+          </div>
+        </NikkeWindow>
       </div>
 
       <div className={styles.dialog}>
@@ -729,7 +693,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
 
                 <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
               </div>
-              {mark && (
+              {/*   {mark && (
                 <div
                   className={styles.dtitle}
                   style={{
@@ -742,7 +706,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
                 >
                   Author: {dialogData.author}
                 </div>
-              )}
+              )} */}
             </div>
           </div>
           <div className={`${styles.dcontent} ${styles.toImg}`} ref={dialogContent}>
@@ -761,20 +725,8 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
           </div>
         </div>
       )}
-      {openExportImg.isOpen && (
-        <>
-          <NikkeWindow
-            title="导出图片"
-            buttonSuccess="导出"
-            buttonCancel="取消"
-            success={exportRealToImg}
-            cancel={cancel}
-            confirm={true}
-          >
-            <ExportImgContent preview={preview} {...props} dialogData={dialogData} totalImages={totalImages} />
-          </NikkeWindow>
-        </>
-      )}
+
+      <ExportImgContent preview={preview} {...props} dialogData={dialogData} totalImages={totalImages} />
     </>
   );
 };

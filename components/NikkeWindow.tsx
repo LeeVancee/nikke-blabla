@@ -29,7 +29,7 @@ const NikkeWindow = ({
   success,
   children,
 }: NikkeWindowProps) => {
-  console.log(222);
+  if (!show) return null;
 
   return (
     <>

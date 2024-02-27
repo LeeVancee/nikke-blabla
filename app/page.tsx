@@ -26,10 +26,10 @@ import NikkeDialog from '@/components/NikkeDialog';
 import toast from 'react-hot-toast';
 //import { openDB } from '@/data/useIndexedDB';
 import saveAs from 'file-saver';
+import BtnBox from '@/components/BtnBox';
 const initialProject: IProjectData = { datas: [] };
 
 export default function Home() {
-  const createProject = useCreateProject();
   const [selectType, setSelectType] = useState('1');
   const [project, setProject] = useState(initialProject);
   const [currentTabId, setCurrentTabId] = useState(1);
@@ -43,8 +43,6 @@ export default function Home() {
   const [proDesc, setProDesc] = useState('这是一个简单的小故事');
   const [author, setAuthor] = useState('');
 
-  console.log('render');
-
   const selectTab = useCallback((index: number) => {
     setCurrentTabId(index);
   }, []);
@@ -53,9 +51,7 @@ export default function Home() {
     setSelectType(e.target.value);
   }, []);
 
-  const buttonStyle = { width: '150px', height: '45px', margin: '5px' };
-
-  function select(value: any, index: any) {
+  /* function select(value: any, index: any) {
     let selected = [...selectNikke];
     const isSelected = [...isSelect];
     if (isSelect.length > 0 && isSelect.some((isSelected) => isSelected)) {
@@ -77,9 +73,7 @@ export default function Home() {
     setSelectNikke(selected);
     setIsSelect(isSelected);
     console.log('已选nikke：', selectNikke);
-  }
-
-  //  const dbPromise = useMemo(() => openDB('nikkeDatabase') as Promise<IDBDatabase>, []);
+  } */
 
   useEffect(() => {
     const initDatabase = async () => {
@@ -104,42 +98,11 @@ export default function Home() {
     setListNumber(newData.length);
   }, [project, currentTabId]);
 
-  const checkData = () => proName !== '' && author !== '' && selectNikke.length !== 0;
-
-  const success = () => {
-    if (checkData()) {
-      var msgData: ChatMessageData = {
-        list: [],
-      };
-      const pro: Project = new Project(proName, proDesc, author, parseInt(selectType), msgData);
-      pro.projectNikkes = selectNikke;
-      const updatedProject = { ...project };
-      updatedProject.datas = [...project.datas, pro];
-
-      handleSaveMsg(pro);
-      updateData(updatedProject);
-      setProject(updatedProject);
-      // 清空其他状态
-      setIsSelect([]);
-      setSelectNikke([]);
-      selectTab(pro.type.valueOf());
-      setProName('默认对话');
-      setProType(ProjectType.Nikke);
-      setProDesc('这是一个简单的小故事');
-      setAuthor('');
-      createProject.close();
-    } else {
-      toast.error('对话名称和作者以及对话妮姬不能小于1不能为空！');
-    }
-  };
-  const cancel = () => {
-    setIsSelect([]);
-    setSelectNikke([]);
-    createProject.close();
-    setProName('默认对话');
-    setProType(ProjectType.Nikke);
-    setProDesc('这是一个简单的小故事');
-    setAuthor('');
+  const handleSuccess = (pro: any) => {
+    const updatedProject = { ...project };
+    updatedProject.datas = [...project.datas, pro];
+    updateData(updatedProject);
+    setProject(updatedProject);
   };
 
   const back = () => {
@@ -153,7 +116,6 @@ export default function Home() {
     updatedProject.datas[currentProject] = pro;
     let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
     addDataToDB(NikkeDatabase.nikkeProject, data);
-    setProject(updatedProject);
   };
 
   const handleCurrentProject = (index: number) => {
@@ -195,10 +157,7 @@ export default function Home() {
           <NikkeDialog dialogData={filteredData[currentProject]} back={back} saveMsg={handleSaveMsg} />
         </div>
       )}
-      <div className={styles.btnbox} style={{ height: '100%' }}>
-        <NikkeButton type={buttonType.Cancel} content="导出对话" style={buttonStyle} />
-        <NikkeButton type={buttonType.Success} content="创建对话" onClick={createProject.open} style={buttonStyle} />
-      </div>
+      <BtnBox />
       <div className={styles.box}>
         <div className={`${styles.box} ${styles.back}`}>
           <Image
@@ -210,29 +169,8 @@ export default function Home() {
             priority
           />
         </div>
-        {createProject.isOpen && (
-          <NikkeWindow
-            title="Nikke blabla"
-            confirm={true}
-            buttonSuccess="创建"
-            buttonCancel="取消"
-            success={success}
-            cancel={cancel}
-          >
-            <NikkeWindowContent
-              proName={proName}
-              setProName={setProName}
-              proDesc={proDesc}
-              setProDesc={setProDesc}
-              author={author}
-              setAuthor={setAuthor}
-              selectType={selectType}
-              handleTypeChange={handleTypeChange}
-              isSelect={isSelect}
-              select={select}
-            />
-          </NikkeWindow>
-        )}
+
+        <NikkeWindowContent handleSuccess={handleSuccess} selectType={selectType} handleTypeChange={handleTypeChange} />
 
         <Header currentTabId={currentTabId} selectTab={selectTab} />
 
@@ -248,3 +186,13 @@ export default function Home() {
     </>
   );
 }
+
+/* export default function Home() {
+  console.log('渲染');
+
+  return (
+    <>
+      <BtnBox />
+    </>
+  );
+} */
