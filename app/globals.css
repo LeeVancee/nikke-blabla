@@ -119,18 +119,6 @@ input[type='radio']:checked + label {
 .nikkeInput:focus {
   outline-color: #32b1f4;
 }
-@font-face {
-  font-family: 'sourcehansans';
-  /* 这个名字可以自己定义 */
-  src: url('../assets/fonts/SourceHanSansSC-Bold.ttf');
-  /* Legacy iOS */
-  font-weight: bold;
-  font-style: normal;
-}
-
-* {
-  font-family: 'sourcehansans';
-}
 
 .contentBox {
   overflow: hidden;
