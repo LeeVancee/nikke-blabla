@@ -9,13 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
+    "babel-plugin-react-compiler": "0.0.0-experimental-938cd9a-20240601",
     "file-saver": "^2.0.5",
     "framer-motion": "^11.0.3",
     "html2canvas": "^1.4.1",
     "next": "15.0.0-rc.0",
-    "react": "19.0.0-rc-4c2e457c7c-20240522",
-    "react-dom": "19.0.0-rc-4c2e457c7c-20240522",
+    "react": "19.0.0-rc-6d3110b4d9-20240531",
+    "react-dom": "19.0.0-rc-6d3110b4d9-20240531",
     "react-hot-toast": "^2.4.1",
     "react-transition-group": "^4.4.5",
     "zustand": "^4.4.6"
