@@ -213,76 +213,79 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
     }
   };
 
-  const addImages = () => {
-    // 将选中的图像添加到totalImages，同时检查重复，并且当数据有更新时我们将图片添加到本地数据存储中
+  const addImages = (images: string[]) => {
+    const newTotalImages = [...totalImages];
     let sum = 0;
-    selectedImages.forEach((image) => {
-      if (!totalImages.includes(image)) {
-        totalImages.push(image);
+    images.forEach((image) => {
+      if (!newTotalImages.includes(image)) {
+        newTotalImages.push(image);
         sum++;
         console.log('success');
       }
     });
 
     if (sum > 0) {
-      let data = { sequenceId: NikkeDatabase.nikkeTotalImages, totalImages: JSON.stringify(totalImages) };
+      const data = {
+        sequenceId: NikkeDatabase.nikkeTotalImages,
+        totalImages: JSON.stringify(newTotalImages),
+      };
       addDataToDB(NikkeDatabase.nikkeProject, data);
+      setTotalImages(newTotalImages);
     }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const fileInput = event.target;
-    const files = Array.from(fileInput.files || []);
+    const files = Array.from(event.target.files || []);
 
     if (files.length > 0) {
       const readerPromises = files.map((file) => {
-        return new Promise((resolve) => {
+        return new Promise<string | null>((resolve) => {
           const reader = new FileReader();
           reader.onload = () => {
-            resolve(reader.result);
+            resolve(reader.result as string | null);
           };
           reader.readAsDataURL(file);
         });
       });
 
       Promise.all(readerPromises)
-        .then((imageDataArray: any) => {
-          // const newSelectedImages = [...selectedImages];
-          selectedImages.push(imageDataArray);
-          setSelectedImages(imageDataArray);
+        .then((imageDataArray) => {
+          const validImageDataArray = imageDataArray.filter((data) => typeof data === 'string') as string[];
+          // setSelectedImages(validImageDataArray);
+          addImages(validImageDataArray);
         })
         .catch((error) => {
           console.error(error);
         })
         .finally(() => {
-          addImages();
           router.refresh();
         });
     }
+
+    event.target.value = '';
   };
 
-  const initialImages = useCallback(() => {
-    retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
-      if (value) {
-        const parsedImages = JSON.parse(value.totalImages);
-        // 判斷是否需要更新 totalImages
-        if (JSON.stringify(totalImages) !== JSON.stringify(parsedImages)) {
-          setTotalImages(parsedImages);
-        }
-      } else {
-        console.log('没有图片数据，数据写入中……');
-        addDataToDB(NikkeDatabase.nikkeProject, {
-          sequenceId: NikkeDatabase.nikkeTotalImages,
-          totalImages: JSON.stringify(totalImages),
-        });
-      }
-    });
-  }, [totalImages]); // 僅在 totalImages 或 setTotalImages 改變時更新
-
   useEffect(() => {
-    // 在组件挂载时，从数据库中获取图片数据
+    const initialImages = () => {
+      retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
+        if (value) {
+          const parsedImages = JSON.parse(value.totalImages);
+          if (JSON.stringify(totalImages) !== JSON.stringify(parsedImages)) {
+            setTotalImages(parsedImages);
+          }
+        } else {
+          console.log('没有图片数据，数据写入中……');
+          addDataToDB(NikkeDatabase.nikkeProject, {
+            sequenceId: NikkeDatabase.nikkeTotalImages,
+            totalImages: JSON.stringify(totalImages),
+          });
+        }
+      });
+    };
+
     initialImages();
-  }, [initialImages]);
+  }, [totalImages]); // 仅在组件挂载时执行一次
+
   useEffect(() => {
     scrollToBottom();
   }, [scrollToBottom, dialogData.messageData.list.length]);
