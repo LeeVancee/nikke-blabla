@@ -26,8 +26,6 @@ const ExportImgContent = ({ preview, dialogData, dialogImg }: any) => {
   const openExportImg = useOpenExportImg();
 
   const exportRealToImg = () => {
-    console.log(preview);
-
     if (exportType === exportImgType.png.toString()) {
       setCurrentExportImgState(exportImgState.run);
 
@@ -40,15 +38,14 @@ const ExportImgContent = ({ preview, dialogData, dialogImg }: any) => {
           .then((canvas) => {
             saveAs(canvas.toDataURL(), `${imgName}.png`);
 
-            const img = document.createElement('img');
-            img.crossOrigin = 'anonymous';
-            img.src = canvas.toDataURL();
+            const userImage = new Image();
+            userImage.src = canvas.toDataURL();
 
-            preview.current?.appendChild(img);
+            preview.current?.appendChild(userImage);
 
-            if (dialogImg.current != undefined) {
+            /*  if (dialogImg.current != undefined) {
               dialogImg.current.style.transform = `scale(${1})`;
-            }
+            } */
             setCurrentExportImgState(exportImgState.pause);
           })
           .catch((error: any) => {
@@ -66,15 +63,14 @@ const ExportImgContent = ({ preview, dialogData, dialogImg }: any) => {
         })
           .then((canvas) => {
             saveAs(canvas.toDataURL(), `${imgName}.jpeg`);
+            const userImage = new Image();
+            userImage.src = canvas.toDataURL();
 
-            const img = document.createElement('img');
-            img.src = canvas.toDataURL();
+            preview.current?.appendChild(userImage);
 
-            preview.current?.appendChild(img);
-
-            if (dialogImg.current != undefined) {
+            /* if (dialogImg.current != undefined) {
               dialogImg.current.style.transform = `scale(${1})`;
-            }
+            } */
             setCurrentExportImgState(exportImgState.pause);
           })
           .catch((error: any) => {

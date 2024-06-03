@@ -69,7 +69,7 @@ const NikkeWindowContent = ({ selectType, handleSuccess, handleTypeChange }: Nik
   const success = () => {
     const checkData = () => proName !== '' && author !== '' && selectNikke.length !== 0;
     if (checkData()) {
-      var msgData: ChatMessageData = {
+      let msgData: ChatMessageData = {
         list: [],
       };
       const pro: Project = new Project(proName, proDesc, author, parseInt(selectType), msgData);
@@ -154,15 +154,7 @@ const NikkeWindowContent = ({ selectType, handleSuccess, handleTypeChange }: Nik
               <NikkeInfo>(目前只实现妮姬类型)</NikkeInfo>
             </NikkeRadio>
           </div>
-          {/* <div className={styles.pcontent}>
-          <span>描述 </span>
-          <input
-            className="nikkeInput"
-            value={proDesc}
-            onChange={(e) => setProDesc(e.target.value)}
-            type="text"
-          />
-        </div> */}
+
           <div className={styles.pcontent}>
             <span>作者 *</span>
             <input

@@ -21,12 +21,12 @@ const NikkeSelect = ({ filteredData, onFilteredData }: NikkeSelectProps) => {
     // 如果数组中有这个元素则代表当前nikke是被选择的，所以要删除元素反之则添加元素
     if (!selectNikke.includes(value)) {
       setSelectNikke([...selectNikke, value]);
-      //   setIsSelect([...isSelect.slice(0, index), true, ...isSelect.slice(index + 1)]);
-      isSelect[index] = true;
+      setIsSelect((prevIsSelect) => [...prevIsSelect.slice(0, index), true, ...prevIsSelect.slice(index + 1)]);
+      // isSelect[index] = true;
     } else {
       setSelectNikke(selectNikke.filter((item) => item.img !== value.img));
-      //  setIsSelect([...isSelect.slice(0, index), false, ...isSelect.slice(index + 1)]);
-      isSelect[index] = false;
+      setIsSelect((prevIsSelect) => [...prevIsSelect.slice(0, index), false, ...prevIsSelect.slice(index + 1)]);
+      //  isSelect[index] = false;
     }
     console.log('已选nikke：', selectNikke);
   };

@@ -18,9 +18,9 @@ const Timer = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  function formatTime(time: any) {
+  const formatTime = (time: any) => {
     return time < 10 ? `0${time}` : time;
-  }
+  };
   return <>{currentTime}</>;
 };
 

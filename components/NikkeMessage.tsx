@@ -19,19 +19,18 @@ interface NikkeMessageProps {
 }
 
 const NikkeMessage = ({
-  msgs,
+  msgs: initialMsgs,
   nikke,
   type,
   index: currentIndex,
   currentData,
-  dialogData,
+  dialogData: initialData,
   isEdit,
   onDelete,
   saveMsg,
 }: NikkeMessageProps) => {
-  // const [dialogData, setDialogData] = useState(initialData);
-  // const [msgs, setMsgs] = useState(initialMsgs);
-  //const spaceRefs = useRef([]);
+  const [dialogData, setDialogData] = useState(initialData);
+  const [msgs, setMsgs] = useState(initialMsgs);
   const spaceRefs = useRef<HTMLInputElement>(null);
   const [editContent, setEditContent] = useState('');
   const [editInputs, setEditInputs] = useState<Array<number>>([]);
@@ -51,9 +50,12 @@ const NikkeMessage = ({
   };
 
   const lostfocus = (index: number) => {
+    const updatedMsgs = [...msgs];
+    updatedMsgs[index] = editContent;
+    setMsgs(updatedMsgs);
     // 清空编辑状态
     setEditInputs([]);
-    msgs[index] = editContent;
+
     console.log('失去焦点');
   };
 
@@ -77,16 +79,16 @@ const NikkeMessage = ({
     const newMsgs = [...msgs];
 
     if (msgs.length === 1) {
-      msgs.splice(index, 1);
+      // msgs.splice(index, 1);
 
-      //  setMsgs(newMsgs);
+      setMsgs(newMsgs);
       // msgs
 
-      // onDelete(currentIndex);
+      onDelete(currentIndex);
       dialogData.messageData.list.splice(currentIndex, 1);
     } else {
       msgs.splice(index, 1);
-      //   setMsgs(newMsgs);
+      setMsgs(newMsgs);
     }
     saveMsg(dialogData);
     console.log('删除');

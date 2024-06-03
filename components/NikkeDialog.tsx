@@ -35,10 +35,13 @@ interface NikkeDialogProps {
 
   saveMsg: (pro: Project) => void;
 }
-
+enum exportImgState {
+  pause,
+  run,
+}
 const initialTypeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
 
-const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
+const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProps) => {
   const openExportImg = useOpenExportImg();
   const fileInput = useRef<HTMLInputElement>(null);
   const [typeList, setTypeList] = useState(initialTypeList);
@@ -53,14 +56,14 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
-  //  const [dialogData, setDialogData] = useState(initialData);
+  const [dialogData, setDialogData] = useState(initialData);
   const scrollContainer = useRef<HTMLDivElement | null>(null);
 
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
   const addNikkeWindow = useAddNikkeWindow();
   const router = useRouter();
 
-  function selectModel(type: msgType) {
+  const selectModel = (type: msgType) => {
     setInputPlaceholder('请输入对话内容');
 
     if (type === msgType.img) {
@@ -77,27 +80,28 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     }
 
     setCurrentModel(type);
-  }
+  };
 
-  function selectOC() {
+  const selectOC = () => {
     setIsOC(true);
-  }
-  function selectNikke(index: number) {
+  };
+
+  const selectNikke = (index: number) => {
     setCurrentNikke(index);
     setIsOC(false);
-  }
+  };
 
-  function selectImage(index: number) {
+  const selectImage = (index: number) => {
     if (currentSelectImage === index) {
       setCurrentSelectImage(-1);
     } else {
       setCurrentSelectImage(index);
     }
-  }
+  };
 
-  function show() {
+  const show = () => {
     setIsSelectView(!isSelectView);
-  }
+  };
 
   const openFile = () => {
     fileInput.current?.click();
@@ -243,9 +247,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
 
       Promise.all(readerPromises)
         .then((imageDataArray: any) => {
-          /*  const newImage = selectedImages.concat(imageDataArray);
-
-          setSelectedImages(newImage); */
+          // const newSelectedImages = [...selectedImages];
           selectedImages.push(imageDataArray);
           setSelectedImages(imageDataArray);
         })
@@ -285,18 +287,13 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     scrollToBottom();
   }, [scrollToBottom, dialogData.messageData.list.length]);
 
-  function handleDelete(index: any) {
+  const handleDelete = (index: any) => {
     const newDialogData = { ...dialogData };
 
     newDialogData.messageData.list.splice(index, 1);
 
-    // setDialogData(newDialogData);
-  }
-
-  enum exportImgState {
-    pause,
-    run,
-  }
+    setDialogData(newDialogData);
+  };
 
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
   const [currentExportImgState, setCurrentExportImgState] = useState(exportImgState.pause);
@@ -314,67 +311,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     setFilteredData(newFilteredData);
   };
 
-  /*  const exportRealToImg = () => {
-    console.log(preview);
-
-    if (exportType === exportImgType.png.toString()) {
-      setCurrentExportImgState(exportImgState.run);
-
-      if (dialogImg.current != undefined) {
-        html2canvas(dialogImg.current, {
-          allowTaint: true,
-          useCORS: true,
-          scale: scale,
-        })
-          .then((canvas) => {
-            saveAs(canvas.toDataURL(), `${imgName}.png`);
-
-            const img = document.createElement('img');
-            img.crossOrigin = 'anonymous';
-            img.src = canvas.toDataURL();
-
-            preview.current?.appendChild(img);
-
-            if (dialogImg.current != undefined) {
-              dialogImg.current.style.transform = `scale(${1})`;
-            }
-            setCurrentExportImgState(exportImgState.pause);
-          })
-          .catch((error: any) => {
-            toast.error('oops, something went wrong!', error);
-            alert(error);
-          });
-      }
-    } else if (exportType === exportImgType.jpeg.toString()) {
-      setCurrentExportImgState(exportImgState.run);
-      if (dialogImg.current != undefined) {
-        html2canvas(dialogImg.current, {
-          useCORS: true,
-          allowTaint: true,
-          scale: scale,
-        })
-          .then((canvas) => {
-            saveAs(canvas.toDataURL(), `${imgName}.jpeg`);
-
-            const img = document.createElement('img');
-            img.src = canvas.toDataURL();
-
-            preview.current?.appendChild(img);
-
-            if (dialogImg.current != undefined) {
-              dialogImg.current.style.transform = `scale(${1})`;
-            }
-            setCurrentExportImgState(exportImgState.pause);
-          })
-          .catch((error: any) => {
-            console.error('oops, something went wrong!', error);
-          });
-      }
-    } else {
-      toast.error('图片格式不支持');
-    }
-  }; */
-  function clamp(vaule: number, min: number, max: number) {
+  const clamp = (vaule: number, min: number, max: number) => {
     if (vaule < min) {
       return min;
     }
@@ -384,7 +321,7 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
     }
 
     return vaule;
-  }
+  };
 
   const selectType = (index: number) => {
     setCurrentImageType(index);
@@ -489,9 +426,6 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
               </div>
             </>
           )}
-          {/*  {isSelectView && (
-         
-        )} */}
 
           {isImgListView && (
             <div style={{ backgroundColor: '#fcfcfc' }}>
@@ -693,20 +627,6 @@ const NikkeDialog = ({ dialogData, back, saveMsg }: NikkeDialogProps) => {
 
                 <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
               </div>
-              {/*   {mark && (
-                <div
-                  className={styles.dtitle}
-                  style={{
-                    marginLeft: 'auto',
-                    display: 'flex',
-                    marginRight: '10px',
-                    fontSize: '16px',
-                    marginTop: '5px',
-                  }}
-                >
-                  Author: {dialogData.author}
-                </div>
-              )} */}
             </div>
           </div>
           <div className={`${styles.dcontent} ${styles.toImg}`} ref={dialogContent}>
