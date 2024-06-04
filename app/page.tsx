@@ -19,7 +19,7 @@ export default function Home() {
   const [filteredData, setFilteredData] = useState<Project[]>();
   const [listNumber, setListNumber] = useState(0);
   const [currentProject, setCurrentProject] = useState(-1);
-  console.log('home render');
+  // console.log('home render');
 
   const selectTab = useCallback((index: number) => {
     setCurrentTabId(index);

@@ -26,10 +26,9 @@ import ExportMessage from '@/components/exportOnly/ExportMessage';
 import NikkeSelect from './NikkeSelect';
 import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
 import { useRouter } from 'next/navigation';
-
 interface NikkeDialogProps {
   dialogData: any;
-  back: (pro: Project) => void;
+  back: () => void;
   project: IProjectData;
   currentProject: number;
 }
@@ -354,7 +353,7 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
               <Timer />
             </span>
           </div>
-          <div className={styles.dback} onClick={() => back(dialogData)}>
+          <div className={styles.dback} onClick={() => back()}>
             <div className={styles.dtitle}>
               <Image src="/back.png" alt=" back" width={25} height={25} style={{ marginTop: '2px' }} />
               <span style={{ verticalAlign: 'middle' }}>{dialogData?.name}</span>
@@ -612,7 +611,7 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
               </span>
               <Timer />
             </div>
-            <div className={styles.dback} onClick={() => back(dialogData)}>
+            <div className={styles.dback} onClick={() => back()}>
               <div className={styles.dtitle}>
                 <img src="/back.png" alt=" back" style={{ marginTop: '2px', width: '25px', height: '25px' }} />
 

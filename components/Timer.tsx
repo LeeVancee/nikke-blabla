@@ -4,23 +4,29 @@ import { useEffect, useState } from 'react';
 
 const Timer = () => {
   const [currentTime, setCurrentTime] = useState('');
+
   useEffect(() => {
-    function updateTime() {
+    let animationFrameId: number;
+
+    const updateTime = () => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
 
       setCurrentTime(`${formatTime(hours)}:${formatTime(minutes)}`);
-    }
 
-    const intervalId = setInterval(updateTime, 1000);
+      animationFrameId = requestAnimationFrame(updateTime);
+    };
 
-    return () => clearInterval(intervalId);
+    updateTime();
+
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
-  const formatTime = (time: any) => {
+  const formatTime = (time: number) => {
     return time < 10 ? `0${time}` : time;
   };
+
   return <>{currentTime}</>;
 };
 
