@@ -8,7 +8,6 @@ import {
   Project,
   enterprise,
   msgType,
-  exportImgType,
   ImgConfig,
   retrieveDataFromDB,
   NikkeDatabase,
@@ -21,10 +20,7 @@ import NikkeMessage from './NikkeMessage';
 import useOpenExportImg from '@/hooks/useOpenExportImg';
 import NikkeWindow from './NikkeWindow';
 import ExportImgContent from './ExportImgContent';
-import { saveAs } from 'file-saver';
 import ExportMessage from '@/components/exportOnly/ExportMessage';
-import html2canvas from 'html2canvas';
-import toast from 'react-hot-toast';
 import NikkeSelect from './NikkeSelect';
 import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
 import { useRouter } from 'next/navigation';
@@ -35,16 +31,12 @@ interface NikkeDialogProps {
 
   saveMsg: (pro: Project) => void;
 }
-enum exportImgState {
-  pause,
-  run,
-}
-const initialTypeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
+
+const typeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
 
 const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProps) => {
   const openExportImg = useOpenExportImg();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [typeList, setTypeList] = useState(initialTypeList);
   const [currentModel, setCurrentModel] = useState(msgType.nikke);
   const [inputPlaceholder, setInputPlaceholder] = useState('请输入对话内容');
   const [inputContent, setInputContent] = useState('');
@@ -53,12 +45,11 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
   const [currentNikke, setCurrentNikke] = useState(0);
   const [isImgListView, setIsImgListView] = useState(false);
   const [totalImages, setTotalImages] = useState<string[]>([]);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  // const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
   const [dialogData, setDialogData] = useState(initialData);
   const scrollContainer = useRef<HTMLDivElement | null>(null);
-
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
   const addNikkeWindow = useAddNikkeWindow();
   const router = useRouter();
@@ -114,10 +105,9 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
     if (scrollContainer.current) {
       scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
     }
-    router.refresh();
-  }, [scrollContainer, router]);
+  }, [scrollContainer]);
 
-  const add = useCallback(() => {
+  const add = () => {
     const newInfo: ICharacterData = {
       msgType: currentModel, //正常消息类型
       msg: [],
@@ -154,18 +144,7 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
     setInputContent('');
     saveMsg(newDialogData);
     scrollToBottom();
-  }, [
-    dialogData,
-    currentModel,
-    currentNikke,
-    isOC,
-    currentSelectImage,
-    inputContent,
-    saveMsg,
-    totalImages,
-    currentImageType,
-    scrollToBottom,
-  ]);
+  };
 
   const append = () => {
     // const lastMessage = dialogData.messageData.list[dialogData.messageData.list.length - 1];
@@ -290,25 +269,33 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
     scrollToBottom();
   }, [scrollToBottom, dialogData.messageData.list.length]);
 
-  const handleDelete = (index: any) => {
+  const handleDeleteAdd = (index: any) => {
     const newDialogData = { ...dialogData };
 
     newDialogData.messageData.list.splice(index, 1);
 
     setDialogData(newDialogData);
+    saveMsg(newDialogData);
+  };
+  const handleDeleteAppend = (index: any) => {
+    const newDialogData = { ...dialogData };
+    newDialogData.messageData.list[newDialogData.messageData.list.length - 1].msg.splice(index, 1);
+    setDialogData(newDialogData);
+    saveMsg(newDialogData);
   };
 
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
-  const [currentExportImgState, setCurrentExportImgState] = useState(exportImgState.pause);
+
   const preview = useRef<HTMLDivElement | null>(null);
   const dialogImg = useRef<HTMLDivElement | null>(null);
   const dialogHeader = useRef<HTMLDivElement | null>(null);
   const dialogContent = useRef<HTMLDivElement | null>(null);
-  const [imgConfig, setImgConfig] = useState<ImgConfig>({
+
+  const imgConfig: ImgConfig = {
     width: 500,
     maxWidth: 550,
     bottomHeigth: 15,
-  });
+  };
 
   const handleFilteredData = (newFilteredData: any) => {
     setFilteredData(newFilteredData);
@@ -329,12 +316,6 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
   const selectType = (index: number) => {
     setCurrentImageType(index);
     console.log(index);
-  };
-  const props = {
-    dialogData,
-    currentExportImgState,
-    exportImgState,
-    dialogImg,
   };
 
   return (
@@ -379,12 +360,10 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
               type={value.msgType}
               msgs={value.msg}
               index={index}
-              currentData={totalImages}
-              dialogData={dialogData}
               isEdit={true}
               nikke={value.nikke}
-              onDelete={handleDelete}
-              saveMsg={saveMsg}
+              onDeleteAdd={handleDeleteAdd}
+              onDeleteAppend={handleDeleteAppend}
             />
           ))}
         </div>
@@ -649,7 +628,7 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
         </div>
       )}
 
-      <ExportImgContent preview={preview} {...props} dialogData={dialogData} totalImages={totalImages} />
+      <ExportImgContent preview={preview} dialogData={dialogData} dialogImg={dialogImg} totalImages={totalImages} />
     </>
   );
 };

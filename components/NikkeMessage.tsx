@@ -11,11 +11,9 @@ interface NikkeMessageProps {
   nikke: INikkeData;
   type: msgType;
   index: number;
-  currentData: string[];
-  dialogData: Project;
   isEdit: boolean;
-  onDelete: (index: number) => void;
-  saveMsg: (pro: Project) => void;
+  onDeleteAdd: (index: number) => void;
+  onDeleteAppend: (index: number) => void;
 }
 
 const NikkeMessage = ({
@@ -23,13 +21,10 @@ const NikkeMessage = ({
   nikke,
   type,
   index: currentIndex,
-  currentData,
-  dialogData: initialData,
   isEdit,
-  onDelete,
-  saveMsg,
+  onDeleteAdd,
+  onDeleteAppend,
 }: NikkeMessageProps) => {
-  const [dialogData, setDialogData] = useState(initialData);
   const [msgs, setMsgs] = useState(initialMsgs);
   const spaceRefs = useRef<HTMLInputElement>(null);
   const [editContent, setEditContent] = useState('');
@@ -75,22 +70,13 @@ const NikkeMessage = ({
       setEditContent(msgs[index]);
     }
   };
-  function deleteMsg(index: any) {
-    const newMsgs = [...msgs];
-
+  function deleteMsg() {
     if (msgs.length === 1) {
-      // msgs.splice(index, 1);
-
-      setMsgs(newMsgs);
-      // msgs
-
-      onDelete(currentIndex);
-      dialogData.messageData.list.splice(currentIndex, 1);
+      onDeleteAdd(currentIndex);
     } else {
-      msgs.splice(index, 1);
-      setMsgs(newMsgs);
+      onDeleteAppend(currentIndex);
     }
-    saveMsg(dialogData);
+
     console.log('删除');
   }
 
