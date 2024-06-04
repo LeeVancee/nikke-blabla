@@ -1,24 +1,21 @@
 'use client';
 import styles from '@/app/page.module.css';
-import { ChatMessageData, INikkeData, Project, ProjectType, nikke, nikkeData } from '@/script/project';
+import { ChatMessageData, INikkeData, Project, ProjectType, nikkeData } from '@/script/project';
 import NikkeRadio from './NikkeRadio';
 import NikkeInfo from './NikkeInfo';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
 import NikkeWindow from './NikkeWindow';
 import useCreateProject from '@/hooks/useCreateProject';
 interface NikkeWindowContentProps {
-  selectType: string;
-  handleTypeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   nikkeData?: INikkeData[];
-
   handleSuccess: (pro: any) => void;
 }
 
 const enterprises = ['All', '极乐净土', '米西里斯', '泰特拉', '朝圣者', '反常', '配角', '主角', '动物', '莱彻'];
 
-const NikkeWindowContent = ({ selectType, handleSuccess, handleTypeChange }: NikkeWindowContentProps) => {
+const NikkeWindowContent = ({ handleSuccess }: NikkeWindowContentProps) => {
   const [selectedEnterprise, setSelectedEnterprise] = useState(0);
   const [filteredNikkes, setFilteredNikkes] = useState(nikkeData.nikkes);
   const [proName, setProName] = useState('');
@@ -29,6 +26,12 @@ const NikkeWindowContent = ({ selectType, handleSuccess, handleTypeChange }: Nik
   const [selectNikke, setSelectNikke] = useState<Array<INikkeData>>([]);
 
   const createProject = useCreateProject();
+
+  const [selectType, setSelectType] = useState('1');
+
+  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectType(e.target.value);
+  }, []);
 
   const selectEnterprise = (enterprise: any) => {
     setSelectedEnterprise(enterprise);

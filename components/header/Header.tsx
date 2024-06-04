@@ -1,26 +1,15 @@
 import styles from '@/app/page.module.css';
 import Image from 'next/image';
 import Timer from '../Timer';
-import { useMemo } from 'react';
-import { IProjectData, Project, ProjectType } from '@/script/project';
+import { ProjectType } from '@/script/project';
 
-const initialData = [
+const data = [
   { id: ProjectType.Task, type: '任务' },
   { id: ProjectType.Nikke, type: '妮姬' },
   { id: ProjectType.Group, type: '群组' },
 ];
 
-const initialProject: IProjectData = { datas: [] };
-
 const Header = ({ currentTabId, selectTab }: any) => {
-  const data = useMemo(
-    () => [
-      { id: ProjectType.Task, type: '任务' },
-      { id: ProjectType.Nikke, type: '妮姬' },
-      { id: ProjectType.Group, type: '群组' },
-    ],
-    []
-  );
   return (
     <div className={styles.header}>
       <div className={styles.title}>

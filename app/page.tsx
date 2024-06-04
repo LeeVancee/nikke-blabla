@@ -13,19 +13,16 @@ import BtnBox from '@/components/BtnBox';
 
 export default function Home() {
   const initialProject: IProjectData = { datas: [] };
-  const [selectType, setSelectType] = useState('1');
+
   const [project, setProject] = useState(initialProject);
   const [currentTabId, setCurrentTabId] = useState(1);
   const [filteredData, setFilteredData] = useState<Project[]>();
   const [listNumber, setListNumber] = useState(0);
   const [currentProject, setCurrentProject] = useState(-1);
+  console.log('home render');
 
   const selectTab = useCallback((index: number) => {
     setCurrentTabId(index);
-  }, []);
-
-  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectType(e.target.value);
   }, []);
 
   useEffect(() => {
@@ -64,13 +61,6 @@ export default function Home() {
 
   // 保存对话函数
 
-  const handleSaveMsg = (pro: Project) => {
-    const updatedProject = { ...project };
-    updatedProject.datas[currentProject] = pro;
-    let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
-    addDataToDB(NikkeDatabase.nikkeProject, data);
-  };
-
   const handleCurrentProject = (index: number) => {
     setCurrentProject(index);
   };
@@ -104,7 +94,12 @@ export default function Home() {
     <>
       {filteredData && currentProject !== -1 && (
         <div style={{ height: '100%' }}>
-          <NikkeDialog dialogData={filteredData[currentProject]} back={back} saveMsg={handleSaveMsg} />
+          <NikkeDialog
+            dialogData={filteredData[currentProject]}
+            back={back}
+            project={project}
+            currentProject={currentProject}
+          />
         </div>
       )}
       <BtnBox />
@@ -120,7 +115,7 @@ export default function Home() {
           />
         </div>
 
-        <NikkeWindowContent handleSuccess={handleSuccess} selectType={selectType} handleTypeChange={handleTypeChange} />
+        <NikkeWindowContent handleSuccess={handleSuccess} />
 
         <Header currentTabId={currentTabId} selectTab={selectTab} />
 

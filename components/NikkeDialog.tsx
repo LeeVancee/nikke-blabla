@@ -14,6 +14,8 @@ import {
   addDataToDB,
   ImgType,
   builtinImageDatas,
+  IProjectData,
+  Database,
 } from '../script/project';
 import Timer from './Timer';
 import NikkeMessage from './NikkeMessage';
@@ -28,13 +30,13 @@ import { useRouter } from 'next/navigation';
 interface NikkeDialogProps {
   dialogData: any;
   back: (pro: Project) => void;
-
-  saveMsg: (pro: Project) => void;
+  project: IProjectData;
+  currentProject: number;
 }
 
 const typeList = [msgType.nikke, msgType.img, msgType.aside, msgType.partition];
 
-const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProps) => {
+const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }: NikkeDialogProps) => {
   const openExportImg = useOpenExportImg();
   const fileInput = useRef<HTMLInputElement>(null);
   const [currentModel, setCurrentModel] = useState(msgType.nikke);
@@ -53,6 +55,13 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
   const addNikkeWindow = useAddNikkeWindow();
   const router = useRouter();
+
+  const handleSaveMsg = (pro: Project) => {
+    const updatedProject = { ...project };
+    updatedProject.datas[currentProject] = pro;
+    let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
+    addDataToDB(NikkeDatabase.nikkeProject, data);
+  };
 
   const selectModel = (type: msgType) => {
     setInputPlaceholder('请输入对话内容');
@@ -142,7 +151,7 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
     //  setDialogData(newDialogData);
 
     setInputContent('');
-    saveMsg(newDialogData);
+    handleSaveMsg(newDialogData);
     scrollToBottom();
   };
 
@@ -179,7 +188,7 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
       setInputContent('');
     }
     scrollToBottom();
-    saveMsg(dialogData);
+    handleSaveMsg(dialogData);
   };
 
   const check = () => {
@@ -275,13 +284,13 @@ const NikkeDialog = ({ dialogData: initialData, back, saveMsg }: NikkeDialogProp
     newDialogData.messageData.list.splice(index, 1);
 
     setDialogData(newDialogData);
-    saveMsg(newDialogData);
+    handleSaveMsg(newDialogData);
   };
   const handleDeleteAppend = (index: any) => {
     const newDialogData = { ...dialogData };
     newDialogData.messageData.list[newDialogData.messageData.list.length - 1].msg.splice(index, 1);
     setDialogData(newDialogData);
-    saveMsg(newDialogData);
+    handleSaveMsg(newDialogData);
   };
 
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
