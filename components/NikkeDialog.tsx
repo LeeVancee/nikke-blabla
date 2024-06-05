@@ -9,9 +9,7 @@ import {
   enterprise,
   msgType,
   ImgConfig,
-  retrieveDataFromDB,
   NikkeDatabase,
-  addDataToDB,
   ImgType,
   builtinImageDatas,
   IProjectData,
@@ -26,6 +24,7 @@ import ExportMessage from '@/components/exportOnly/ExportMessage';
 import NikkeSelect from './NikkeSelect';
 import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
 import { useRouter } from 'next/navigation';
+import { addDataToDB, retrieveDataFromDB } from '@/data/useIndexedDB';
 interface NikkeDialogProps {
   dialogData: any;
   back: () => void;

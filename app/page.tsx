@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useState, useEffect, useCallback } from 'react';
-import { Project, IProjectData, NikkeDatabase, Database, addDataToDB, retrieveDataFromDB } from '@/script/project';
+import { Project, IProjectData, NikkeDatabase, Database } from '@/script/project';
 import Header from '@/components/header/Header';
 import Text from '@/components/text/Text';
 import Contents from '@/components/contents/Contents';
@@ -10,6 +10,7 @@ import NikkeWindowContent from '@/components/NikkeWindowContent';
 import NikkeDialog from '@/components/NikkeDialog';
 import saveAs from 'file-saver';
 import BtnBox from '@/components/BtnBox';
+import { addDataToDB, retrieveDataFromDB } from '@/data/useIndexedDB';
 
 export default function Home() {
   const initialProject: IProjectData = { datas: [] };

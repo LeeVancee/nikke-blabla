@@ -1,4 +1,7 @@
-import { Database } from '../script/project';
+export interface Database {
+  sequenceId: number;
+  projects: string;
+}
 export function openDB(dbName: string, version = 1) {
   // 在服务器端渲染时，直接返回一个 resolved 的 Promise(修复SSR框架下 window 为 undefined 的情况)
   if (typeof window === 'undefined') {
@@ -82,3 +85,17 @@ export function deleteDB(db: IDBDatabase, storeName: string, id: number) {
     console.log('数据删除失败');
   };
 }
+
+export const addDataToDB = async (storeName: string, data: any) => {
+  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
+  const db: IDBDatabase = await dbPromise;
+  addData(db, storeName, data);
+};
+
+// 获取数据
+export const retrieveDataFromDB = async (storeName: string, key: number) => {
+  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
+  const db = await dbPromise;
+  const result: any = await getDataByKey(db, storeName, key);
+  return result;
+};

@@ -88,19 +88,6 @@ export interface Database {
 import { getDataByKey, addData, openDB } from '../data/useIndexedDB';
 
 // 2. 添加数据
-export const addDataToDB = async (storeName: string, data: any) => {
-  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
-  const db: IDBDatabase = await dbPromise;
-  addData(db, storeName, data);
-};
-
-// 获取数据
-export const retrieveDataFromDB = async (storeName: string, key: number) => {
-  const dbPromise: Promise<IDBDatabase> = openDB('nikkeDatabase') as Promise<IDBDatabase>;
-  const db = await dbPromise;
-  const result: any = await getDataByKey(db, storeName, key);
-  return result;
-};
 
 export interface ImgConfig {
   width: number;
