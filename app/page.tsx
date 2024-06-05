@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { useRef, useState } from 'react';
-import { Project, IProjectData, NikkeDatabase, Database } from '@/script/project';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { Project, IProjectData, Database } from '@/script/project';
 import Header from '@/components/header/Header';
 import Text from '@/components/text/Text';
 import Contents from '@/components/contents/Contents';
@@ -10,45 +10,24 @@ import NikkeWindowContent from '@/components/NikkeWindowContent';
 import NikkeDialog from '@/components/NikkeDialog';
 import saveAs from 'file-saver';
 import BtnBox from '@/components/BtnBox';
-import { addDataToDB, retrieveDataFromDB } from '@/data/useIndexedDB';
+import { addDataToDB, retrieveDataFromDB } from '@/data/db';
+import useInitializeData from '@/hooks/useInitializeData';
 
 export default function Home() {
-  const initialProject: IProjectData = { datas: [] };
-
-  const [project, setProject] = useState(initialProject);
   const [currentTabId, setCurrentTabId] = useState(1);
-  const [filteredData, setFilteredData] = useState<Project[]>();
+  const [filteredData, setFilteredData] = useState<Project[]>([]);
   const [listNumber, setListNumber] = useState(0);
   const [currentProject, setCurrentProject] = useState(-1);
-  const isInitialized = useRef(false);
 
-  const selectTab = (index: number) => {
-    setCurrentTabId(index);
-    filterData(index);
-  };
-
-  const initializeData = async () => {
-    try {
-      const value = await retrieveDataFromDB(NikkeDatabase.nikkeProject, 1);
-      if (value) {
-        const parsedProject = JSON.parse(value.projects);
-        setProject(parsedProject);
-        filterData(currentTabId, parsedProject);
-      }
-      isInitialized.current = true;
-    } catch (error) {
-      console.error('Error during initialization:', error);
-    }
-  };
-
-  if (!isInitialized.current) {
-    initializeData();
-  }
-
-  const filterData = (tabId: number, projectData: IProjectData = project) => {
+  const filterData = useCallback((tabId: number, projectData: { datas: any[] }) => {
     const newData = projectData.datas.filter((item) => item.type === tabId);
     setFilteredData(newData);
     setListNumber(newData.length);
+  }, []);
+  const { project, setProject } = useInitializeData(currentTabId, filterData);
+  const selectTab = (index: number) => {
+    setCurrentTabId(index);
+    filterData(index, project);
   };
 
   const handleSuccess = (pro: any) => {
@@ -56,23 +35,22 @@ export default function Home() {
     updatedProject.datas = [...project.datas, pro];
     updateData(updatedProject);
     setProject(updatedProject);
+    filterData(currentTabId, updatedProject);
   };
 
   const back = () => {
     setCurrentProject(-1);
   };
 
-  // 保存对话函数
-
   const handleCurrentProject = (index: number) => {
     setCurrentProject(index);
   };
 
-  const updateData = (pro: { datas: Project[] }) => {
+  const updateData = async (pro: { datas: Project[] }) => {
     let str = JSON.stringify(pro);
     console.log('更新对象项目到indexDB中');
     let data: Database = { sequenceId: 1, projects: str };
-    addDataToDB(NikkeDatabase.nikkeProject, data);
+    await addDataToDB(data);
   };
 
   const deleteDialog = (index: number) => {
@@ -81,7 +59,9 @@ export default function Home() {
     const updatedProject = { ...project, datas: updatedDatas };
     updateData(updatedProject);
     setProject(updatedProject);
+    filterData(currentTabId, updatedProject);
   };
+
   const dialogExport = (index: number) => {
     let currentData = project.datas[index];
     downloadJson(currentData, 'data.json');

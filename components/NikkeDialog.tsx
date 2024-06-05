@@ -9,7 +9,6 @@ import {
   enterprise,
   msgType,
   ImgConfig,
-  NikkeDatabase,
   ImgType,
   builtinImageDatas,
   IProjectData,
@@ -24,7 +23,8 @@ import ExportMessage from '@/components/exportOnly/ExportMessage';
 import NikkeSelect from './NikkeSelect';
 import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
 import { useRouter } from 'next/navigation';
-import { addDataToDB, retrieveDataFromDB } from '@/data/useIndexedDB';
+import { addDataToDB, retrieveDataFromDB } from '@/data/db';
+import { useInitializeImageData } from '@/hooks/useInitializeData';
 interface NikkeDialogProps {
   dialogData: any;
   back: () => void;
@@ -44,7 +44,7 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
   const [isOC, setIsOC] = useState(false);
   const [currentNikke, setCurrentNikke] = useState(0);
   const [isImgListView, setIsImgListView] = useState(false);
-  const [totalImages, setTotalImages] = useState<string[]>([]);
+  // const [totalImages, setTotalImages] = useState<string[]>([]);
   // const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
@@ -54,11 +54,14 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
   const addNikkeWindow = useAddNikkeWindow();
   const router = useRouter();
 
+  const initialTotalImages: string[] = []; // 初始化 totalImages 的默认值
+  const { totalImages, setTotalImages } = useInitializeImageData(initialTotalImages);
+
   const handleSaveMsg = (pro: Project) => {
     const updatedProject = { ...project };
     updatedProject.datas[currentProject] = pro;
     let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
-    addDataToDB(NikkeDatabase.nikkeProject, data);
+    addDataToDB(data);
   };
 
   const selectModel = (type: msgType) => {
@@ -212,10 +215,10 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
 
     if (sum > 0) {
       const data = {
-        sequenceId: NikkeDatabase.nikkeTotalImages,
+        sequenceId: 2,
         totalImages: JSON.stringify(newTotalImages),
       };
-      addDataToDB(NikkeDatabase.nikkeProject, data);
+      addDataToDB(data);
       setTotalImages(newTotalImages);
     }
   };
@@ -251,11 +254,11 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
     event.target.value = '';
   };
 
-  const isInitialized = useRef(false); // 使用 ref 来跟踪初始化状态
+  /*  const isInitialized = useRef(false); // 使用 ref 来跟踪初始化状态
   useEffect(() => {
     const initializeData = async () => {
       try {
-        const value = await retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages);
+        const value = await retrieveDataFromDB(2);
         if (value) {
           const parsedImages = JSON.parse(value.totalImages);
           if (JSON.stringify(totalImages) !== JSON.stringify(parsedImages)) {
@@ -263,8 +266,8 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
           }
         } else {
           console.log('没有图片数据，数据写入中……');
-          addDataToDB(NikkeDatabase.nikkeProject, {
-            sequenceId: NikkeDatabase.nikkeTotalImages,
+          addDataToDB({
+            sequenceId: 2,
             totalImages: JSON.stringify(totalImages),
           });
         }
@@ -278,25 +281,10 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
       initializeData();
     }
   }, [totalImages]); // 依赖 totalImages，确保在变化时重新加载数据
-
+ */
   useEffect(() => {
     scrollToBottom();
   }, [scrollToBottom, dialogData.messageData.list.length]);
-
-  const handleDeleteAdd = (index: any) => {
-    const newDialogData = { ...dialogData };
-
-    newDialogData.messageData.list.splice(index, 1);
-
-    setDialogData(newDialogData);
-    handleSaveMsg(newDialogData);
-  };
-  const handleDeleteAppend = (index: any) => {
-    const newDialogData = { ...dialogData };
-    newDialogData.messageData.list[newDialogData.messageData.list.length - 1].msg.splice(index, 1);
-    setDialogData(newDialogData);
-    handleSaveMsg(newDialogData);
-  };
 
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
 
@@ -376,8 +364,9 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
               index={index}
               isEdit={true}
               nikke={value.nikke}
-              onDeleteAdd={handleDeleteAdd}
-              onDeleteAppend={handleDeleteAppend}
+              saveMsg={handleSaveMsg}
+              dialogData={dialogData}
+              setDialogData={setDialogData}
             />
           ))}
         </div>

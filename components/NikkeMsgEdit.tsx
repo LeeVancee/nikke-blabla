@@ -7,7 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 
 interface editProps {
   currentIndex: number;
-  deleted: () => void;
+  deleted: (index: number) => void;
   edit: (editIndex: number) => void;
   add: (insertIndex: number, isUpOrDown: number) => void;
 }
@@ -33,7 +33,7 @@ const NikkeMsgEdit = ({ currentIndex, deleted, edit, add }: editProps) => {
               &#8593;
               <div className={styles.upadd} onClick={() => addEdit(0)}></div>
               <div className={styles.edittool} onClick={() => edit(currentIndex)}></div>
-              <div className={styles.delete} onClick={() => deleted()}></div>
+              <div className={styles.delete} onClick={() => deleted(currentIndex)}></div>
               <div className={styles.downadd} onClick={() => addEdit(1)}></div>
               &#8595;
             </div>

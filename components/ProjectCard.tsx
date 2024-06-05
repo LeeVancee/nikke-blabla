@@ -1,3 +1,5 @@
+'use client';
+import { useState, useEffect } from 'react';
 import { Project } from '@/script/project';
 import styles from './css/ProjectCard.module.css';
 import Image from 'next/image';
@@ -6,7 +8,7 @@ import Link from 'next/link';
 interface ProjectCardProps {
   selectNikkes: Project;
   children?: React.ReactNode;
-  onClick?: () => void | undefined;
+  onClick?: () => void;
 }
 
 const MessageContent = ({ message }: any) => {
@@ -18,10 +20,30 @@ const MessageContent = ({ message }: any) => {
 };
 
 const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
-  const lastMessage =
-    selectNikkes.messageData.list.length > 0
-      ? selectNikkes.messageData.list[selectNikkes.messageData.list.length - 1]
-      : null;
+  const [lastMessage, setLastMessage] = useState(() => {
+    // 初始状态设置为 messageData.list 的最后一项
+    const initialMessage =
+      selectNikkes.messageData.list.length > 0
+        ? selectNikkes.messageData.list[selectNikkes.messageData.list.length - 1]
+        : null;
+    return initialMessage;
+  });
+
+  useEffect(() => {
+    // 监听 messageData.list 的变化
+    const handleNewMessages = () => {
+      if (selectNikkes.messageData.list.length > 0) {
+        setLastMessage(selectNikkes.messageData.list[selectNikkes.messageData.list.length - 1]);
+      } else {
+        setLastMessage(null);
+      }
+    };
+
+    handleNewMessages(); // 初始调用
+    const intervalId = setInterval(handleNewMessages, 1000); // 示例：每秒检查一次，实际可根据需求调整
+
+    return () => clearInterval(intervalId); // 清理定时器
+  }, [selectNikkes.messageData.list]);
 
   return (
     <div className={styles.card} onClick={onClick}>
@@ -33,7 +55,6 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
       ></div>
       <div className={styles.textContent}>
         {children}
-
         <div
           style={{
             display: 'flex',
@@ -52,10 +73,7 @@ const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
             <Link href="#">{selectNikkes.author}</Link>
           </span>
         </div>
-
-        <div
-          style={{ flex: 1, fontSize: '15px', marginTop: '2px', color: 'gray' }}
-        >
+        <div style={{ flex: 1, fontSize: '15px', marginTop: '2px', color: 'gray' }}>
           <span>{lastMessage && <MessageContent message={lastMessage} />}</span>
         </div>
       </div>
