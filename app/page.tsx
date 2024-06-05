@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState } from 'react';
 import { Project, IProjectData, NikkeDatabase, Database } from '@/script/project';
 import Header from '@/components/header/Header';
 import Text from '@/components/text/Text';
@@ -20,34 +20,36 @@ export default function Home() {
   const [filteredData, setFilteredData] = useState<Project[]>();
   const [listNumber, setListNumber] = useState(0);
   const [currentProject, setCurrentProject] = useState(-1);
-  // console.log('home render');
+  const isInitialized = useRef(false);
 
-  const selectTab = useCallback((index: number) => {
+  const selectTab = (index: number) => {
     setCurrentTabId(index);
-  }, []);
+    filterData(index);
+  };
 
-  useEffect(() => {
-    const initDatabase = async () => {
-      try {
-        const value = await retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeData);
-        if (value) {
-          const parsedProject = JSON.parse(value.projects);
-          console.log('已经有数据了！', parsedProject);
-          setProject(parsedProject);
-        }
-      } catch (error) {
-        console.error('Error during initialization:', error);
+  const initializeData = async () => {
+    try {
+      const value = await retrieveDataFromDB(NikkeDatabase.nikkeProject, 1);
+      if (value) {
+        const parsedProject = JSON.parse(value.projects);
+        setProject(parsedProject);
+        filterData(currentTabId, parsedProject);
       }
-    };
+      isInitialized.current = true;
+    } catch (error) {
+      console.error('Error during initialization:', error);
+    }
+  };
 
-    initDatabase();
-  }, []);
+  if (!isInitialized.current) {
+    initializeData();
+  }
 
-  useEffect(() => {
-    const newData = project.datas.filter((item) => item.type === currentTabId);
+  const filterData = (tabId: number, projectData: IProjectData = project) => {
+    const newData = projectData.datas.filter((item) => item.type === tabId);
     setFilteredData(newData);
     setListNumber(newData.length);
-  }, [project, currentTabId]);
+  };
 
   const handleSuccess = (pro: any) => {
     const updatedProject = { ...project };

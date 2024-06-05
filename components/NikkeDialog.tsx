@@ -251,9 +251,11 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
     event.target.value = '';
   };
 
+  const isInitialized = useRef(false); // 使用 ref 来跟踪初始化状态
   useEffect(() => {
-    const initialImages = () => {
-      retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages).then((value) => {
+    const initializeData = async () => {
+      try {
+        const value = await retrieveDataFromDB(NikkeDatabase.nikkeProject, NikkeDatabase.nikkeTotalImages);
         if (value) {
           const parsedImages = JSON.parse(value.totalImages);
           if (JSON.stringify(totalImages) !== JSON.stringify(parsedImages)) {
@@ -266,11 +268,16 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
             totalImages: JSON.stringify(totalImages),
           });
         }
-      });
+      } catch (error) {
+        console.error('Error during initialization:', error);
+      }
+      isInitialized.current = true;
     };
 
-    initialImages();
-  }, [totalImages]); // 仅在组件挂载时执行一次
+    if (!isInitialized.current) {
+      initializeData();
+    }
+  }, [totalImages]); // 依赖 totalImages，确保在变化时重新加载数据
 
   useEffect(() => {
     scrollToBottom();
