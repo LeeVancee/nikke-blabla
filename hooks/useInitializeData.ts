@@ -39,6 +39,26 @@ export default useInitializeData;
 export const useInitializeImageData = (initialTotalImages: string[]) => {
   const [totalImages, setTotalImages] = useState<string[]>(initialTotalImages);
   const isInitialized = useRef(false);
+  const addImages = (images: string[]) => {
+    const newTotalImages = [...totalImages];
+    let sum = 0;
+    images.forEach((image) => {
+      if (!newTotalImages.includes(image)) {
+        newTotalImages.push(image);
+        sum++;
+        console.log('success');
+      }
+    });
+
+    if (sum > 0) {
+      const data = {
+        sequenceId: 2,
+        totalImages: JSON.stringify(newTotalImages),
+      };
+      addDataToDB(data);
+      setTotalImages(newTotalImages);
+    }
+  };
 
   useEffect(() => {
     const initializeData = async () => {
@@ -67,5 +87,5 @@ export const useInitializeImageData = (initialTotalImages: string[]) => {
     }
   }, [totalImages]);
 
-  return { totalImages, setTotalImages };
+  return { totalImages, setTotalImages, addImages };
 };

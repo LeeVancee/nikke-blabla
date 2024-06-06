@@ -25,6 +25,7 @@ import useAddNikkeWindow from '@/hooks/useAddNikkeWindow';
 import { useRouter } from 'next/navigation';
 import { addDataToDB, retrieveDataFromDB } from '@/data/db';
 import { useInitializeImageData } from '@/hooks/useInitializeData';
+import useScrollToBottom from '@/hooks/useScrollToBottom';
 interface NikkeDialogProps {
   dialogData: any;
   back: () => void;
@@ -49,13 +50,13 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
   const [currentSelectImage, setCurrentSelectImage] = useState<number>(-1);
   const inputRef = useRef(null);
   const [dialogData, setDialogData] = useState(initialData);
-  const scrollContainer = useRef<HTMLDivElement | null>(null);
+  // const scrollContainer = useRef<HTMLDivElement | null>(null);
   const [currentImageType, setCurrentImageType] = useState<ImgType>(ImgType.localImage);
   const addNikkeWindow = useAddNikkeWindow();
   const router = useRouter();
 
   const initialTotalImages: string[] = []; // 初始化 totalImages 的默认值
-  const { totalImages, setTotalImages } = useInitializeImageData(initialTotalImages);
+  const { totalImages, addImages } = useInitializeImageData(initialTotalImages);
 
   const handleSaveMsg = (pro: Project) => {
     const updatedProject = { ...project };
@@ -63,6 +64,8 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
     let data: Database = { sequenceId: 1, projects: JSON.stringify(updatedProject) };
     addDataToDB(data);
   };
+
+  const { scrollContainer } = useScrollToBottom([dialogData.messageData.list.length]);
 
   const selectModel = (type: msgType) => {
     setInputPlaceholder('请输入对话内容');
@@ -111,11 +114,6 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
   const openFileInput = () => {
     setIsImgListView(!isImgListView);
   };
-  const scrollToBottom = useCallback(() => {
-    if (scrollContainer.current) {
-      scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
-    }
-  }, [scrollContainer]);
 
   const add = () => {
     const newInfo: ICharacterData = {
@@ -149,11 +147,10 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
     }
     const newDialogData = { ...dialogData };
     newDialogData.messageData.list.push(newInfo);
-    //  setDialogData(newDialogData);
+    setDialogData(newDialogData);
 
     setInputContent('');
     handleSaveMsg(newDialogData);
-    scrollToBottom();
   };
 
   const append = () => {
@@ -181,28 +178,18 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
       lastMessage.msgType = model;
       lastMessage.msg.push(inputContent);
     } else {
-      // 在修改之前打印
-
       lastMessage.msg.push(inputContent);
-      // 在修改之后打印
 
       setInputContent('');
     }
-    scrollToBottom();
-    handleSaveMsg(dialogData);
+
+    const newDialogData = { ...dialogData };
+    setDialogData(newDialogData);
+
+    handleSaveMsg(newDialogData);
   };
 
-  const check = () => {
-    // 如果当前模式是图片
-    if (currentSelectImage !== -1) {
-      return;
-    }
-    if (inputContent !== '' && currentModel !== msgType.aside && currentModel !== msgType.partition) {
-      setCurrentModel(msgType.nikke);
-    }
-  };
-
-  const addImages = (images: string[]) => {
+  /*  const addImages = (images: string[]) => {
     const newTotalImages = [...totalImages];
     let sum = 0;
     images.forEach((image) => {
@@ -220,6 +207,16 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
       };
       addDataToDB(data);
       setTotalImages(newTotalImages);
+    }
+  };
+ */
+  const check = () => {
+    // 如果当前模式是图片
+    if (currentSelectImage !== -1) {
+      return;
+    }
+    if (inputContent !== '' && currentModel !== msgType.aside && currentModel !== msgType.partition) {
+      setCurrentModel(msgType.nikke);
     }
   };
 
@@ -282,9 +279,6 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
     }
   }, [totalImages]); // 依赖 totalImages，确保在变化时重新加载数据
  */
-  useEffect(() => {
-    scrollToBottom();
-  }, [scrollToBottom, dialogData.messageData.list.length]);
 
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
 
