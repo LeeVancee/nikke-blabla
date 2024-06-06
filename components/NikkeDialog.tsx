@@ -189,27 +189,6 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
     handleSaveMsg(newDialogData);
   };
 
-  /*  const addImages = (images: string[]) => {
-    const newTotalImages = [...totalImages];
-    let sum = 0;
-    images.forEach((image) => {
-      if (!newTotalImages.includes(image)) {
-        newTotalImages.push(image);
-        sum++;
-        console.log('success');
-      }
-    });
-
-    if (sum > 0) {
-      const data = {
-        sequenceId: 2,
-        totalImages: JSON.stringify(newTotalImages),
-      };
-      addDataToDB(data);
-      setTotalImages(newTotalImages);
-    }
-  };
- */
   const check = () => {
     // 如果当前模式是图片
     if (currentSelectImage !== -1) {
@@ -250,36 +229,6 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
 
     event.target.value = '';
   };
-
-  /*  const isInitialized = useRef(false); // 使用 ref 来跟踪初始化状态
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        const value = await retrieveDataFromDB(2);
-        if (value) {
-          const parsedImages = JSON.parse(value.totalImages);
-          if (JSON.stringify(totalImages) !== JSON.stringify(parsedImages)) {
-            setTotalImages(parsedImages);
-          }
-        } else {
-          console.log('没有图片数据，数据写入中……');
-          addDataToDB({
-            sequenceId: 2,
-            totalImages: JSON.stringify(totalImages),
-          });
-        }
-      } catch (error) {
-        console.error('Error during initialization:', error);
-      }
-      isInitialized.current = true;
-    };
-
-    if (!isInitialized.current) {
-      initializeData();
-    }
-  }, [totalImages]); // 依赖 totalImages，确保在变化时重新加载数据
- */
-
   const [filteredData, setFilteredData] = useState(dialogData.projectNikkes);
 
   const preview = useRef<HTMLDivElement | null>(null);
@@ -312,6 +261,10 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
   const selectType = (index: number) => {
     setCurrentImageType(index);
     console.log(index);
+  };
+  const handleMsg = (dialogData: Project) => {
+    setDialogData(dialogData);
+    handleSaveMsg(dialogData);
   };
 
   return (
@@ -358,9 +311,8 @@ const NikkeDialog = ({ dialogData: initialData, back, project, currentProject }:
               index={index}
               isEdit={true}
               nikke={value.nikke}
-              saveMsg={handleSaveMsg}
               dialogData={dialogData}
-              setDialogData={setDialogData}
+              handleMsg={handleMsg}
             />
           ))}
         </div>

@@ -12,21 +12,11 @@ interface NikkeMessageProps {
   type: msgType;
   index: number;
   isEdit: boolean;
-  saveMsg: (pro: any) => void;
-  dialogData: any;
-  setDialogData: any;
+  dialogData: Project;
+  handleMsg: (dialogData: any) => void;
 }
 
-const NikkeMessage = ({
-  msgs,
-  nikke,
-  type,
-  index: currentIndex,
-  isEdit,
-  saveMsg,
-  dialogData,
-  setDialogData,
-}: NikkeMessageProps) => {
+const NikkeMessage = ({ msgs, nikke, type, index: currentIndex, isEdit, dialogData, handleMsg }: NikkeMessageProps) => {
   const spaceRefs = useRef<HTMLInputElement>(null);
   const [editContent, setEditContent] = useState('');
   const [editInputs, setEditInputs] = useState<Array<number>>([]);
@@ -74,7 +64,6 @@ const NikkeMessage = ({
     const newDialogData = { ...dialogData };
 
     if (msgs.length === 1) {
-      // msgs.splice(currentIndex, 1);
       newDialogData.messageData.list.splice(currentIndex, 1);
       console.log('删除');
     } else {
@@ -82,15 +71,8 @@ const NikkeMessage = ({
 
       console.log('删除追加');
     }
-    setDialogData(newDialogData);
-    saveMsg(newDialogData);
+    handleMsg(newDialogData);
   }
-
-  /*   const parseImgToDataURL = (content: string) => {
-    let value = content.split(' ');
-    let index: string = value[1].substring(1, value[1].length - 1);
-    return parseInt(index);
-  }; */
 
   const parseImgToDataURL = (content: string) => {
     const matches = content.match(/\[url\]\[base64:\]\s*\[([^\]]+)\]/);
