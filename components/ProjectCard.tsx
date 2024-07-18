@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Project } from '@/script/project';
+import {useEffect, useState} from 'react';
+import {Project} from '@/script/project';
 import styles from './css/ProjectCard.module.css';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -22,11 +22,9 @@ const MessageContent = ({ message }: any) => {
 const ProjectCard = ({ selectNikkes, children, onClick }: ProjectCardProps) => {
   const [lastMessage, setLastMessage] = useState(() => {
     // 初始状态设置为 messageData.list 的最后一项
-    const initialMessage =
-      selectNikkes.messageData.list.length > 0
+    return selectNikkes.messageData.list.length > 0
         ? selectNikkes.messageData.list[selectNikkes.messageData.list.length - 1]
         : null;
-    return initialMessage;
   });
 
   useEffect(() => {

@@ -28,8 +28,7 @@ export const addDataToDB = async (data: Database) => {
 // Retrieve data from database
 export const retrieveDataFromDB = async (sequenceId: number) => {
   try {
-    const result = await db.table('nikkeProject').get(sequenceId);
-    return result;
+    return await db.table('nikkeProject').get(sequenceId);
   } catch (error) {
     console.error('Failed to retrieve data', error);
     throw error;

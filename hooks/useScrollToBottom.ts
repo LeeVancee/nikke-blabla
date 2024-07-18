@@ -11,7 +11,7 @@ const useScrollToBottom = (dependencies: any[] = []) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [scrollToBottom, ...dependencies]);
+  }, [scrollToBottom]);
 
   return { scrollContainer, scrollToBottom };
 };

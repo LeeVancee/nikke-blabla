@@ -71,7 +71,7 @@ export const useInitializeImageData = (initialTotalImages: string[]) => {
           }
         } else {
           console.log('没有图片数据，数据写入中……');
-          addDataToDB({
+          await addDataToDB({
             sequenceId: NikkeDatabase.nikkeTotalImages,
             totalImages: JSON.stringify(totalImages),
           });

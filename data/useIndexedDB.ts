@@ -9,7 +9,7 @@ export function openDB(dbName: string, version = 1) {
   }
   return new Promise<IDBDatabase>((resolve, _reject) => {
     //  兼容浏览器
-    var indexedDB = window.indexedDB;
+    const indexedDB = window.indexedDB;
     let db: IDBDatabase;
     // 打开数据库，若没有则会创建
     const request = indexedDB.open(dbName, version);
@@ -28,7 +28,7 @@ export function openDB(dbName: string, version = 1) {
       // 数据库创建或升级的时候会触发
       console.log('onupgradeneeded');
       db = (event.target as IDBOpenDBRequest).result; // 数据库对象
-      var objectStore;
+      let objectStore;
       // 创建存储库
       objectStore = db.createObjectStore('nikkeProject', {
         keyPath: 'sequenceId', // 这是主键
@@ -43,10 +43,10 @@ export function openDB(dbName: string, version = 1) {
 }
 
 export function addData(db: IDBDatabase, storeName: string, data: Database) {
-  var request = db
-    .transaction([storeName], 'readwrite') // 事务对象 指定表格名称和操作模式（"只读"或"读写"）
-    .objectStore(storeName) // 仓库对象
-    .put(data);
+  const request = db
+      .transaction([storeName], 'readwrite') // 事务对象 指定表格名称和操作模式（"只读"或"读写"）
+      .objectStore(storeName) // 仓库对象
+      .put(data);
 
   request.onsuccess = function () {
     console.log('数据写入成功');
@@ -59,9 +59,9 @@ export function addData(db: IDBDatabase, storeName: string, data: Database) {
 
 export function getDataByKey(db: IDBDatabase, storeName: string, key: number) {
   return new Promise((resolve, _reject) => {
-    var transaction = db.transaction([storeName]); // 事务
-    var objectStore = transaction.objectStore(storeName); // 仓库对象
-    var request = objectStore.get(key); // 通过主键获取数据
+    const transaction = db.transaction([storeName]); // 事务
+    const objectStore = transaction.objectStore(storeName); // 仓库对象
+    const request = objectStore.get(key); // 通过主键获取数据
 
     request.onerror = function () {
       console.log('事务失败');
@@ -75,7 +75,7 @@ export function getDataByKey(db: IDBDatabase, storeName: string, key: number) {
 }
 
 export function deleteDB(db: IDBDatabase, storeName: string, id: number) {
-  var request = db.transaction([storeName], 'readwrite').objectStore(storeName).delete(id);
+  const request = db.transaction([storeName], 'readwrite').objectStore(storeName).delete(id);
 
   request.onsuccess = function () {
     console.log('数据删除成功');

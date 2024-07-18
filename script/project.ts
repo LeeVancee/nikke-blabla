@@ -85,14 +85,13 @@ export interface Database {
   projects: string;
 }
 
-import { getDataByKey, addData, openDB } from '../data/useIndexedDB';
 
 // 2. 添加数据
 
 export interface ImgConfig {
   width: number;
   maxWidth: number;
-  bottomHeigth: number;
+  bottomHeight: number;
 }
 
 export interface Inikkes {
