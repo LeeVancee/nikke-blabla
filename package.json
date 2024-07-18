@@ -14,9 +14,9 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^11.0.3",
     "html2canvas": "^1.4.1",
-    "next": "15.0.0-rc.0",
-    "react": "19.0.0-rc-6d3110b4d9-20240531",
-    "react-dom": "19.0.0-rc-6d3110b4d9-20240531",
+    "next": "15.0.0-canary.71",
+    "react": "19.0.0-rc-163365a0-20240717",
+    "react-dom": "19.0.0-rc-163365a0-20240717",
     "react-hot-toast": "^2.4.1",
     "react-transition-group": "^4.4.5",
     "zustand": "^4.4.6"
